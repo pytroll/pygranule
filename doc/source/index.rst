@@ -29,6 +29,7 @@ Contents:
    installation
    usage
    examples
+   architecture
    api
 
 Indices and tables

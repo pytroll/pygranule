@@ -3,6 +3,7 @@ from collections import OrderedDict
 from datetime import datetime, timedelta
 from .time_tools import floor_granule_datetime
 from .file_name_parser import FileNameParser
+from .local_file_access_layer import LocalFileAccessLayer
 
 class GranuleFilter(object):
     id = 0 # object id. - static class var.
@@ -43,7 +44,11 @@ class GranuleFilter(object):
                 raise KeyError("Invalid configuration key '%s'"%(key))
 
         # instanciate file name parser
-        self.filenameparser = FileNameParser(self.config['file_source_pattern'],self.config['subsets'])
+        self.file_name_parser = FileNameParser(self.config['file_source_pattern'],self.config['subsets'])
+
+        # instanciate file access parser, if set
+        if self.config['protocol'] is not None:
+            self.file_access_layer = LocalFileAccessLayer()
         
     def validate(self,filename):
         """
@@ -53,10 +58,10 @@ class GranuleFilter(object):
         Returns True or False.
         """
         # check file name pattern
-        if not self.filenameparser.validate_filename(filename):
+        if not self.file_name_parser.validate_filename(filename):
             return False
         # check granulation
-        t = self.filenameparser.time_from_filename(filename)
+        t = self.file_name_parser.time_from_filename(filename)
         t_flrd = floor_granule_datetime(t,self.get_time_step(),self.get_time_step_offset())
         if t_flrd != t:
             return False

@@ -19,9 +19,9 @@ class PyOrbitalLayer(OrbitalLayer):
         # instantiate orbital module
         
         try:
-            config_file_path = os.environ['GETSAT_CONFIG_PATH']
+            config_file_path = os.environ['PYGRANULE_CONFIG_PATH']
         except KeyError:
-            raise OrbitalLayerError( "Getsat config file path missing.  Has the 'GETSAT_CONFIG_PATH' environment variable been set?")
+            raise OrbitalLayerError( "pygranule config file path missing.  Has the 'PYGRANULE_CONFIG_PATH' environment variable been set?")
         
         default_tle_file = config_file_path+"/default.tle"
         
