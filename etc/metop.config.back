@@ -1,0 +1,8 @@
+[EARS_AVHRR_METOP-A]
+sat_name: MetOp-A
+sat_id:
+type: orbital
+protocol: scp
+server: msg01.vedur.is
+file_source_pattern: AVHR_HRP_00_M02_%Y%m%d%H%M00Z_20131004132800Z_N_O_20131004133253Z.bz2
+time_stamp_alignment: 0.0 #beginning

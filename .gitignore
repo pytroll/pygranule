@@ -1,0 +1,7 @@
+/pyorbital
+/doc/Makefile~
+/doc/source/conf.py~
+/pycoast
+/pygranule/*.pyc
+/pygranule/*~
+/doc/build/*
