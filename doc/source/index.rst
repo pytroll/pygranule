@@ -15,7 +15,7 @@ pygranule is a package for validating, fetching and scheduling
 satellite data granules.
 The source code of the package can be found at google codes, googlecode_
 
-.. image:: images/next_sampling_aoi.png
+.. .. image:: images/next_sampling_aoi.png
         :width: 350px
         :align: center
 
@@ -29,8 +29,8 @@ Contents:
    installation
    usage
    examples
-   architecture
-   api
+   programming
+
 
 Indices and tables
 ==================

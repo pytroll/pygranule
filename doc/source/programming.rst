@@ -1,6 +1,8 @@
+Programming
+======================
 
-Architecture (DRAFT)
-----------------------
+:mod:`pygranule` architecture (DRAFT)
+-----------------------------------------
 
 The main high level module in pygranule is the GranuleFilter.
 The GranuleFilter holds the granule acquisition configuration,
@@ -23,3 +25,15 @@ GranuleFilter in detail
 .. image:: images/GranuleFilter.png
         :width: 800px
         :align: center
+
+
+
+:mod:`pygranule` API (DRAFT)
+-------------------------------
+
+
+
+.. automodule:: pygranule
+   :members:
+   :undoc-members:
+
