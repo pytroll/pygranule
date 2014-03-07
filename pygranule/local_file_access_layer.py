@@ -17,7 +17,7 @@ class LocalFileAccessLayer(FileAccessLayer):
          "/home/ftp/data/avhrr/avh_noaa19_20140225_1401.hrp.bz2",
          "/home/ftp/data/avhrr/avh_noaa19_20140225_1403.hrp.bz2"]
         """
-        return [ x for x in os.listdir(directory) if os.path.isfile(x) ]
+        return [ x for x in os.listdir(directory) if os.path.isfile(directory+'/'+x) ]
 
     def file_copy(self, source, destination):
         """

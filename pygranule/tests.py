@@ -6,15 +6,36 @@ from .periodic_granule_filter import PeriodicGranuleFilter
 from .orbital_granule_filter import OrbitalGranuleFilter
 from .local_file_access_layer import LocalFileAccessLayer
 from datetime import datetime
+import os
+import shutil
 
 class TestLocalFileAccessLayer(unittest.TestCase):
     def setUp(self):
+        # make some files and dir under /tmp
+        self.workdir="/tmp/test_pygranule"
+
+        os.mkdir(self.workdir)
+        os.mkdir(self.workdir+"/testdir1")
+        os.mkdir(self.workdir+"/testdir2")
+        open(self.workdir+"/file1", 'w').close()
+        open(self.workdir+"/file2", 'w').close()
+        open(self.workdir+"/file3", 'w').close()
+        open(self.workdir+"/testdir1/file4", 'w').close()
+
+        # instance
         self.fal = LocalFileAccessLayer()
 
+    def tearDown(self):
+        shutil.rmtree(self.workdir)
+
+
     def test_list_directory(self):
-        files = self.fal.list_directory("./")
+        files = self.fal.list_directory(self.workdir)
+        self.assertItemsEqual(files,['file1','file2','file3'])
 
-
+    def test_file_copy(self):
+        self.fal.file_copy(self.workdir+"/file1",self.workdir+"/testdir2/file5")
+        self.assertItemsEqual( os.listdir(self.workdir+"/testdir2"), ['file5'])
 
 class TestOrbitalGranuleFilter(unittest.TestCase):
     def setUp(self):
