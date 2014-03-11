@@ -47,7 +47,7 @@ class GranuleFilter(object):
         self.file_name_parser = FileNameParser(self.config['file_source_pattern'],self.config['subsets'])
 
         # instanciate file access parser, if set
-        if self.config['protocol'] is not None:
+        if self.config['protocol'] == "local":
             self.file_access_layer = LocalFileAccessLayer()
         
     def validate(self,filename):

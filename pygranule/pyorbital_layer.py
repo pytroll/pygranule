@@ -54,7 +54,7 @@ class PyOrbitalLayer(OrbitalLayer):
         s_times = self.scan_geom.times(t)
         pixels_pos = compute_pixels((self.orbital.tle.line1, self.orbital.tle.line2), 
                                     self.scan_geom, s_times)
-        pos_time = get_lonlatalt(pixels_pos, s_times)        
+        pos_time = get_lonlatalt(pixels_pos, s_times)
         return np.array((pos_time[0],pos_time[1]))
 
     def next_transit(self, start=datetime.now(), resolution=100):

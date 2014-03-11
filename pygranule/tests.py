@@ -2,6 +2,7 @@
 import unittest
 
 from .file_name_parser import FileNameParser
+from .pyorbital_layer import PyOrbitalLayer
 from .periodic_granule_filter import PeriodicGranuleFilter
 from .orbital_granule_filter import OrbitalGranuleFilter
 from .local_file_access_layer import LocalFileAccessLayer
@@ -21,6 +22,7 @@ class TestLocalFileAccessLayer(unittest.TestCase):
         open(self.workdir+"/file2", 'w').close()
         open(self.workdir+"/file3", 'w').close()
         open(self.workdir+"/testdir1/file4", 'w').close()
+        open(self.workdir+"/testdir1/filetoremove", 'w').close()
 
         # instance
         self.fal = LocalFileAccessLayer()
@@ -28,14 +30,37 @@ class TestLocalFileAccessLayer(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.workdir)
 
-
-    def test_list_directory(self):
-        files = self.fal.list_directory(self.workdir)
+    def test_list_source_directory(self):
+        files = self.fal.list_source_directory(self.workdir)
         self.assertItemsEqual(files,['file1','file2','file3'])
 
-    def test_file_copy(self):
-        self.fal.file_copy(self.workdir+"/file1",self.workdir+"/testdir2/file5")
+    def test_copy_file(self):
+        self.fal.copy_file(self.workdir+"/file1",self.workdir+"/testdir2/file5")
         self.assertItemsEqual( os.listdir(self.workdir+"/testdir2"), ['file5'])
+
+    def test_remove_source_file(self):
+        self.fal.remove_source_file(self.workdir+"/testdir1/filetoremove")
+        self.assertItemsEqual( os.listdir(self.workdir+"/testdir1"), ['file4'])
+
+class TestPyOrbitalLayer(unittest.TestCase):
+    def setUp(self):
+        self.ol = PyOrbitalLayer( ((-25,62.5),(-25,67),(-13,67),(-13,62.5)),
+                                  "NOAA 19",
+                                  "AVHRR" )
+        # override orbital_layer with a particular TLE orbital element.
+        self.ol.set_tle("1 29499U 06044A   11254.96536486  .00000092  00000-0  62081-4 0  5221",
+                        "2 29499  98.6804 312.6735 0001758 111.9178 248.2152 14.21501774254058")
+        
+    def test_next_transit(self):
+        start_t = datetime(2014,1,23,13,01)
+        t = self.ol.next_transit(start_t)
+        t_ref = datetime(2014,1,23,13,26,7)
+        
+        dt = t - t_ref
+
+        self.assertTrue( abs(dt.total_seconds()) < 1.0 )
+        
+
 
 class TestOrbitalGranuleFilter(unittest.TestCase):
     def setUp(self):
@@ -82,6 +107,7 @@ class TestPeriodicGranuleFilter(unittest.TestCase):
     def setUp(self):
         config = {'config_name':"DummySatData",
                   'sat_name':"DummySat",
+                  'protocol':"local",
                   'file_source_pattern':"H-000-MSG3__-MSG3________-{0}___-00000{1}___-%Y%m%d%H%M",
                   'subsets':"{IR_108:{1..8}}",
                   'time_step':"00:15:00",
