@@ -1,6 +1,6 @@
 
 from datetime import datetime
-
+from os.path import dirname
 
 
 class FileNameParser(object):
@@ -85,6 +85,21 @@ class FileNameParser(object):
         else:
             raise ValueError("Invalid filename -> No subset extracted")
 
+    def directories(self):
+        """
+        Expands the filename pattern and returns a list of
+        directories where files should be located.
+        This is useful, in case directories need to be listed
+        for new files using a file access module.
+        """
+        # extract subset patterns
+        subset_patterns = [ x[0] for x in _subset_filename_expansion(self.pattern,self.subsets) ]
+        # basename them and make unique
+        directories = []
+        [ directories.append(dirname(x)) for x in subset_patterns if dirname(x) not in directories ]
+        return directories
+
+
 def _subset_filename_expansion(pattern, subset, values=()):
     """ helper function for expanding subset filenames into filename path pattern 
 -- input argument values should NOT be used by caller (recursive argument) """
@@ -94,9 +109,10 @@ def _subset_filename_expansion(pattern, subset, values=()):
             L = L + _subset_filename_expansion(pattern, subset[key],values+(key,))
         return L
     else:
-        # pad up missing values
-        for i in range(pattern.count("{")-len(values)):
-            values = values+("",)
+        # pad up missing values 
+        # (for unused place holders, edited out - not sure we need this)
+        #for i in range(pattern.count("{")-len(values)):
+        #    values = values+("",)
         # format pattern
         return [(pattern.format(*values),values)]
 

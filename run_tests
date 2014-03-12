@@ -1,1 +1,1 @@
-python -m unittest -v pygranule.tests
+PYGRANULE_CONFIG_PATH=$PWD/etc python -m unittest -v pygranule.tests

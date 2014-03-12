@@ -90,6 +90,17 @@ class GranuleFilter(object):
         """
         return True
 
+    def list_source(self):
+        """
+        List source directories 'remote filesystem'.
+        Returns a list of available filename paths.
+        """
+        directories = self.file_name_parser.directories()
+        files = []
+        for d in directories:
+            files += self.file_access_layer.list_source_directory(d)
+        return files
+
     def __call__(self,filenames):
         return self.filter(filenames)
 
@@ -146,6 +157,7 @@ class GranuleFilter(object):
         return aoi
 
     get_aoi = get_area_of_interest
+
 
 
     
