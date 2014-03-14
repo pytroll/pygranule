@@ -90,15 +90,28 @@ class GranuleFilter(object):
         """
         return True
 
-    def list_source(self):
+    def check_source(self):
         """
-        List source directories 'remote filesystem'.
-        Returns a list of available filename paths.
+        Lists source directories 'remote filesystem'.
+        Returns a list of valid filename paths not 
+        already in destination folder.
+        If destination folder not configured, then
+        simply returns all valid files.
         """
+        # expand pattern to list of source directories
         directories = self.file_name_parser.directories()
         files = []
+        # check files in the directories
         for d in directories:
             files += self.file_access_layer.list_source_directory(d)
+        # filter
+        files = self.filter(files)
+        # drop files already in destination directory
+        if self.config['destination'] is not None:
+            for f in files:
+                if not self.file_access_layer.check_local_file(f):
+                    files.remove(f)
+
         return files
 
     def __call__(self,filenames):
@@ -116,11 +129,11 @@ class GranuleFilter(object):
 
     def _validated_config(self,key):
         """ use this function to get validated data from the config dict """
-        if key == 'subsets':
-            if self.config[key] is not None and _is_balanced_braces(self.config[key]) is False:
-                raise SyntaxError("Unbalanced braces in config key %s: %s"%(key,self.config[key]))
-            else:
-                return self.config[key]
+        if key == 'somekey':
+            #if self.config[key] is not None and _is_balanced_braces(self.config[key]) is False:
+            #    raise SyntaxError("Unbalanced braces in config key %s: %s"%(key,self.config[key]))
+            #else:
+            return self.config[key]
         else:
             return self.config[key]
 

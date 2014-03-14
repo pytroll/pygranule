@@ -59,6 +59,12 @@ class FileAccessLayer(object):
         """
         pass
 
+    def check_for_local_file(self, filename):
+        """
+        Checks if file at path filename exists.
+        Returns True or False.
+        """
+
     
 
     

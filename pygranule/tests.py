@@ -10,6 +10,10 @@ from datetime import datetime
 import os
 import shutil
 
+def make_dummy_file(path):
+    open(path, 'w').close()
+
+
 class TestLocalFileAccessLayer(unittest.TestCase):
     def setUp(self):
         # make some files and dir under /tmp
@@ -18,11 +22,11 @@ class TestLocalFileAccessLayer(unittest.TestCase):
         os.mkdir(self.workdir)
         os.mkdir(self.workdir+"/testdir1")
         os.mkdir(self.workdir+"/testdir2")
-        open(self.workdir+"/file1", 'w').close()
-        open(self.workdir+"/file2", 'w').close()
-        open(self.workdir+"/file3", 'w').close()
-        open(self.workdir+"/testdir1/file4", 'w').close()
-        open(self.workdir+"/testdir1/filetoremove", 'w').close()
+        make_dummy_file(self.workdir+"/file1")
+        make_dummy_file(self.workdir+"/file2")
+        make_dummy_file(self.workdir+"/file3")
+        make_dummy_file(self.workdir+"/testdir1/file4")
+        make_dummy_file(self.workdir+"/testdir1/filetoremove")
 
         # instance
         self.fal = LocalFileAccessLayer()
@@ -32,7 +36,7 @@ class TestLocalFileAccessLayer(unittest.TestCase):
 
     def test_list_source_directory(self):
         files = self.fal.list_source_directory(self.workdir)
-        self.assertItemsEqual(files,['file1','file2','file3'])
+        self.assertItemsEqual(files,[self.workdir+'/file1',self.workdir+'/file2',self.workdir+'/file3'])
 
     def test_copy_file(self):
         self.fal.copy_file(self.workdir+"/file1",self.workdir+"/testdir2/file5")
@@ -108,34 +112,49 @@ class TestPeriodicGranuleFilter(unittest.TestCase):
         config = {'config_name':"DummySatData",
                   'sat_name':"DummySat",
                   'protocol':"local",
-                  'file_source_pattern':"/seviri/{0}/H-000-MSG3__-MSG3________-{0}___-00000{1}___-%Y%m%d%H%M",
+                  'file_source_pattern':"/tmp/seviri/{0}/H-000-MSG3__-MSG3________-{0}___-00000{1}___-%Y%m%d%H%M",
                   'subsets':"{IR_108:{1..8}}",
                   'time_step':"00:15:00",
                   'time_step_offset':"00:00:00"}
+        # set up some dummy source files and folders
+        os.mkdir("/tmp/seviri")
+        os.mkdir("/tmp/seviri/IR_108")
+        os.mkdir("/tmp/seviri/WV_073")
+        make_dummy_file("/tmp/seviri/IR_108/bla")
+        make_dummy_file("/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402202301")
+        make_dummy_file("/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402202300")
+        make_dummy_file("/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402200645")
+        
+        # create the filter
         self.af = PeriodicGranuleFilter(config)
+
+    def tearDown(self):
+        shutil.rmtree("/tmp/seviri")
 
     def test_validate(self):
         # Run
         result1 = self.af.validate("blabla")
         result2 = self.af.validate("")
-        result3 = self.af.validate("/seviri/{0}/H-000-MSG3__-MSG3________-{0}___-00000{1}___-%Y%m%d%H%M")
-        result4 = self.af.validate("/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-%Y%m%d%H%M")
-        result5 = self.af.validate("/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402202301")
+        result3 = self.af.validate("/tmp/seviri/{0}/H-000-MSG3__-MSG3________-{0}___-00000{1}___-%Y%m%d%H%M")
+        result4 = self.af.validate("/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-%Y%m%d%H%M")
+        result5 = self.af.validate("/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402202301")
+        result6 = self.af.validate("/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402202300")
         # Assert
         self.assertFalse(result1)
         self.assertFalse(result2)
         self.assertFalse(result3)
         self.assertFalse(result4)
         self.assertFalse(result5)
+        self.assertTrue(result6)
 
     def test_filter(self):
         # Run
         files = ["blabla",
-                 "/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000004___-201401231315",
-                 "/seviri/WV_073/H-000-MSG3__-MSG3________-WV_073___-000002___-201401231355",
-                 "/seviri/WV_073/H-000-MSG3__-MSG3________-WV_073___-000009___-201401231300",
-                 "/seviri/IR_108/H-000-MSG3__-MSG3________-{0}___-00000{1}___-%Y%m%d%H%M",
-                 "/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000003___-201401231300"]
+                 "/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000004___-201401231315",
+                 "/tmp/seviri/WV_073/H-000-MSG3__-MSG3________-WV_073___-000002___-201401231355",
+                 "/tmp/seviri/WV_073/H-000-MSG3__-MSG3________-WV_073___-000009___-201401231300",
+                 "/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-{0}___-00000{1}___-%Y%m%d%H%M",
+                 "/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000003___-201401231300"]
         result = self.af(files)
         # Assert
         self.assertItemsEqual(result,[files[1],files[5]])
@@ -146,9 +165,13 @@ class TestPeriodicGranuleFilter(unittest.TestCase):
         # Assert
         self.assertEqual(value,"00:15:00")
 
-    def test_list_source(self):
-        # TODO this!
-        print self.af.list_source()
+    def test_check_source(self):
+        # Run
+        result = self.af.check_source()
+        # Assert
+        self.assertItemsEqual( result,
+                               ["/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402202300",
+                                "/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402200645"])
 
 
 class TestFileNameParser(unittest.TestCase):

@@ -31,9 +31,29 @@ GranuleFilter in detail
 :mod:`pygranule` API (DRAFT)
 -------------------------------
 
-
-
+FileNameParser
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: pygranule
-   :members:
+   :members: FileNameParser
    :undoc-members:
+
+GranuleFilter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: pygranule
+   :members: GranuleFilter
+   :undoc-members:
+
+OrbitalGranuleFilter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: pygranule
+   :members: OrbitalGranuleFilter
+   :undoc-members:
+
+OrbitalLayer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: pygranule
+   :members: OrbitalLayer
+   :undoc-members:
+
+
 

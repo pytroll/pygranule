@@ -17,7 +17,7 @@ class LocalFileAccessLayer(FileAccessLayer):
          "/home/ftp/data/avhrr/avh_noaa19_20140225_1401.hrp.bz2",
          "/home/ftp/data/avhrr/avh_noaa19_20140225_1403.hrp.bz2"]
         """
-        return [ x for x in os.listdir(directory) if os.path.isfile(directory+'/'+x) ]
+        return [ directory + '/' + x for x in os.listdir(directory) if os.path.isfile(directory+'/'+x) ]
 
     def list_local_directory(self, directory):
         """
@@ -50,4 +50,10 @@ class LocalFileAccessLayer(FileAccessLayer):
         """
         self.remove_source_file(filename)
 
-        
+    def check_local_file(self, filename):
+        """
+        Checks if file at path filename exists.
+        Returns True or False.
+        """
+        return os.path.isfile(filename)
+
