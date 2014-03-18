@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from .time_tools import floor_granule_datetime
 from .file_name_parser import FileNameParser
 from .local_file_access_layer import LocalFileAccessLayer
+from .file_set import FileSet
 
 class GranuleFilter(object):
     id = 0 # object id. - static class var.
@@ -72,16 +73,16 @@ class GranuleFilter(object):
         return True
 
 
-    def filter(self,filenames):
+    def filter(self,fileset):
         """
-        Filters a list of input filenames, returning
+        Filters a FileSet of input filenames, returning
         only those that pass the validator test (see validate).
         """
         f = []
-        for filename in filenames:
-            if self.validate(filename):
-                f.append(filename)
-        return f
+        for path in fileset.paths():
+            if self.validate(path):
+                f.append(path)
+        return FileSet(f)
 
     def check_sampling_from_time(self, start, period=None):
         """
@@ -93,29 +94,36 @@ class GranuleFilter(object):
     def check_source(self):
         """
         Lists source directories 'remote filesystem'.
-        Returns a list of valid filename paths not 
+        Returns a FileSet of valid filename paths not 
         already in destination folder.
         If destination folder not configured, then
         simply returns all valid files.
         """
         # expand pattern to list of source directories
         directories = self.file_name_parser.directories()
-        files = []
+
+        fileset = FileSet()
         # check files in the directories
         for d in directories:
-            files += self.file_access_layer.list_source_directory(d)
-        # filter
-        files = self.filter(files)
-        # drop files already in destination directory
+            fileset += self.file_access_layer.list_source_directory(d)
+
+        # filter fileset
+        fileset = self.filter(fileset)
+
+        # get destination granule set
         if self.config['destination'] is not None:
-            for f in files:
-                if not self.file_access_layer.check_local_file(f):
-                    files.remove(f)
+            dest_fileset = FileSet( self.file_access_layer.list_local_directory(self.config['destination']) )
 
-        return files
+            # drop files already at destination
+            fileset = fileset.difference( dest_fileset )
 
-    def __call__(self,filenames):
-        return self.filter(filenames)
+        return fileset
+
+    def __call__(self,fileset=None):
+        if fileset is None:
+            return self.check_source()
+        else:
+            return self.filter(fileset)
 
     def __getitem__(self,key):
         return self.config[key]
