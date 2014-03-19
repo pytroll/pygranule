@@ -6,6 +6,8 @@ from .file_name_parser import FileNameParser
 from .local_file_access_layer import LocalFileAccessLayer
 from .file_set import FileSet
 
+import os
+
 class GranuleFilter(object):
     id = 0 # object id. - static class var.
     """
@@ -33,7 +35,7 @@ class GranuleFilter(object):
             ('area_of_interest',None),
             ('point_of_interest',None),
             ('pass_time_duration',None),
-            ('destination',None)
+            ('file_destination_pattern',None)
             ])
 
         # set configuration
@@ -44,8 +46,21 @@ class GranuleFilter(object):
             else:
                 raise KeyError("Invalid configuration key '%s'"%(key))
 
-        # instanciate file name parser
-        self.file_name_parser = FileNameParser(self.config['file_source_pattern'],self.config['subsets'])
+        # if destination pattern is directory,
+        # fill out with file source patter
+        if self.config['file_destination_pattern'] is not None:
+            if self.config['file_destination_pattern'][-1] == '/':
+                self.config['file_destination_pattern'] = self.config['file_destination_pattern'] + os.path.basename(self.config['file_source_pattern'])
+            
+
+        # instanciate source file name parser
+        self.file_name_parser = FileNameParser(self.config['file_source_pattern'],
+                                               self.config['subsets'])
+        self.source_file_name_parser = self.file_name_parser
+
+        # instanciate destination file name parser
+        self.destin_file_name_parser = FileNameParser(self.config['file_destination_pattern'],
+                                                      self.config['subsets'])
 
         # instanciate file access parser, if set
         if self.config['protocol'] == "local":
@@ -53,7 +68,7 @@ class GranuleFilter(object):
         
     def validate(self,filename):
         """
-        Checks if filename matches file name patter,
+        Checks if filename matches source file name patter,
         and granulation pattern
         and area of interest intersect.
         Returns True or False.
@@ -111,11 +126,17 @@ class GranuleFilter(object):
         fileset = self.filter(fileset)
 
         # get destination granule set
-        if self.config['destination'] is not None:
+        if self.config['file_destination_pattern'] is not None:
+            # generate destination file names based on
+            # destination pattern,
+
             dest_fileset = FileSet( self.file_access_layer.list_local_directory(self.config['destination']) )
 
             # drop files already at destination
             fileset = fileset.difference( dest_fileset )
+
+            # put data into a TransferFileSet container,
+            
 
         return fileset
 

@@ -7,6 +7,7 @@ from .periodic_granule_filter import PeriodicGranuleFilter
 from .orbital_granule_filter import OrbitalGranuleFilter
 from .local_file_access_layer import LocalFileAccessLayer
 from .file_set import FileSet
+from .transfer_file_set import TransferFileSet
 from datetime import datetime
 import os
 import shutil
@@ -14,6 +15,39 @@ import shutil
 def make_dummy_file(path):
     open(path, 'w').close()
 
+class TestTransferFileSet(unittest.TestCase):
+    def setUp(self):
+        self.sfiles = ['/tmp/pygranule/source1/file1',
+                        '/tmp/pygranule/source1/file2',
+                        '/tmp/pygranule/source2/file3']
+        self.dfiles = ['/tmp/pygranule/destin1/file1',
+                        '/tmp/pygranule/destin1/file2',
+                        '/tmp/pygranule/destin1/file3']
+
+        self.tfs = TransferFileSet(self.sfiles,self.dfiles)
+
+    def test_paths(self):
+        # Run
+        paths = self.tfs.paths()
+        # Assert
+        self.assertItemsEqual(paths, [(self.sfiles[i],self.dfiles[i]) for i,x in enumerate(self.sfiles)])
+
+    def test_remove(self):
+        # Run
+        self.tfs.remove('file3')
+        paths = self.tfs.paths()
+        # Assert
+        self.sfiles.pop()
+        self.assertItemsEqual(paths, [(self.sfiles[i],self.dfiles[i]) for i,x in enumerate(self.sfiles)])
+
+    def test_add(self):
+        # Run
+        self.tfs.add('/somedir/newfile','/someotherdir/newfile')
+        paths = self.tfs.paths()
+        # Assert
+        self.sfiles.append('/somedir/newfile')
+        self.dfiles.append('/someotherdir/newfile')
+        self.assertItemsEqual(paths, [(self.sfiles[i],self.dfiles[i]) for i,x in enumerate(self.sfiles)]) 
 
 class TestFileSet(unittest.TestCase):
     def setUp(self):
