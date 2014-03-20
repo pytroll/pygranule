@@ -1,6 +1,24 @@
 
 from datetime import datetime
 from os.path import dirname
+from .file_set import FileSet
+
+def file_name_translator( fileset_A, parser_A, parser_B ):
+    """
+    A file name translator, translating fileset_A from (FileNameParser)
+    parser_A to parser_B.
+    """
+    fileset_B = FileSet()
+
+    for f_A in fileset_A.paths():
+        # extract time code and subset
+        t = parser_A.time_from_filename(f_A)
+        subset = parser_A.subset_from_filename(f_A)
+        # generate target filename
+        f_B = parser_B.filename(t,subset)
+        fileset_B.add(f_b)
+
+    return fileset_B
 
 
 class FileNameParser(object):

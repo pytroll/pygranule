@@ -2,7 +2,7 @@
 from collections import OrderedDict
 from datetime import datetime, timedelta
 from .time_tools import floor_granule_datetime
-from .file_name_parser import FileNameParser
+from .file_name_parser import FileNameParser, file_name_translator
 from .local_file_access_layer import LocalFileAccessLayer
 from .file_set import FileSet
 
@@ -114,6 +114,7 @@ class GranuleFilter(object):
         If destination folder not configured, then
         simply returns all valid files.
         """
+        ## SOURCE
         # expand pattern to list of source directories
         directories = self.file_name_parser.directories()
 
@@ -127,10 +128,20 @@ class GranuleFilter(object):
 
         # get destination granule set
         if self.config['file_destination_pattern'] is not None:
-            # generate destination file names based on
-            # destination pattern,
+            ## DESTINATION
+            # expand pattern to list of destination directories
+            dest_directories = self.destin_file_name_parser.directories()
 
-            dest_fileset = FileSet( self.file_access_layer.list_local_directory(self.config['destination']) )
+            dest_fileset = FileSet()
+            # check files in the directories
+            for d in dest_directories:
+                dest_fileset += self.file_access_layer.list_destination_directory(d)
+
+            # translate destin. filenames to source filenames
+            dest_fileset = filename_pattern_translator(dest_fileset, 
+                                                       self.destin_file_name_parser,
+                                                       self.source_file_name_parser)
+
 
             # drop files already at destination
             fileset = fileset.difference( dest_fileset )
