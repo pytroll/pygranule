@@ -1,24 +1,23 @@
 
 from datetime import datetime
 from os.path import dirname
-from .file_set import FileSet
 
-def file_name_translator( fileset_A, parser_A, parser_B ):
+def file_name_translator( filelist_A, parser_A, parser_B ):
     """
-    A file name translator, translating fileset_A from (FileNameParser)
-    parser_A to parser_B.
+    A file name translator, translating filelist_A from (FileNameParser)
+    parser_A to parser_B. Returns a list of translated filename paths.
     """
-    fileset_B = FileSet()
+    filelist_B = []
 
-    for f_A in fileset_A.paths():
+    for f_A in filelist_A:
         # extract time code and subset
         t = parser_A.time_from_filename(f_A)
         subset = parser_A.subset_from_filename(f_A)
         # generate target filename
         f_B = parser_B.filename(t,subset)
-        fileset_B.add(f_b)
+        filelist_B.append(f_b)
 
-    return fileset_B
+    return filelist_B
 
 
 class FileNameParser(object):
@@ -37,7 +36,17 @@ class FileNameParser(object):
             self.subsets = {}
         else:
             self.subsets = _dict_subset_expression(subsets)
-            
+    
+    def filename(self, t, subset):
+        """
+        Applies time code and subset selection,
+        returning a single valid granule file name path.
+        """
+        # apply datetime formatting
+        pattern_w_t = t.strftime(self.pattern)
+
+        return pattern_w_t.format(*subset)
+
     def filenames_from_time(self,t):
         """ 
         Creates a list of legal filenames from the file path pattern, subset names,

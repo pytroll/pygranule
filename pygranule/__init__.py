@@ -6,9 +6,6 @@ from .granule_filter import GranuleFilterError
 from .orbital_granule_filter import OrbitalGranuleFilter
 from .periodic_granule_filter import PeriodicGranuleFilter
 
-from .file_set import FileSet
-from .transfer_file_set import TransferFileSet
-
 def get_granule_filters(config_file_path=None):
     """ reads config file and generates granule filters """
     if config_file_path is None:

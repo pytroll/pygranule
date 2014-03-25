@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 from .time_tools import floor_granule_datetime
 from .file_name_parser import FileNameParser, file_name_translator
 from .local_file_access_layer import LocalFileAccessLayer
-from .file_set import FileSet
 
 import os
 
@@ -88,16 +87,16 @@ class GranuleFilter(object):
         return True
 
 
-    def filter(self,fileset):
+    def filter(self, filepaths):
         """
-        Filters a FileSet of input filenames, returning
+        Filters a list of input file paths, returning
         only those that pass the validator test (see validate).
         """
         f = []
-        for path in fileset.paths():
+        for path in filepaths:
             if self.validate(path):
                 f.append(path)
-        return FileSet(f)
+        return f
 
     def check_sampling_from_time(self, start, period=None):
         """
@@ -109,47 +108,43 @@ class GranuleFilter(object):
     def check_source(self):
         """
         Lists source directories 'remote filesystem'.
-        Returns a FileSet of valid filename paths not 
-        already in destination folder.
-        If destination folder not configured, then
-        simply returns all valid files.
+        returns a validated filename paths as
+        BiDict object, mapping source file names
+        to the equivalent destination file names.
         """
-        ## SOURCE
         # expand pattern to list of source directories
         directories = self.file_name_parser.directories()
 
-        fileset = FileSet()
+        filelist = []
         # check files in the directories
         for d in directories:
-            fileset += self.file_access_layer.list_source_directory(d)
+            filelist += self.file_access_layer.list_source_directory(d)
 
-        # filter fileset
-        fileset = self.filter(fileset)
+        # filter filelist
+        source_list = self.filter(filelist)
 
-        # get destination granule set
-        if self.config['file_destination_pattern'] is not None:
-            ## DESTINATION
-            # expand pattern to list of destination directories
-            dest_directories = self.destin_file_name_parser.directories()
+        # map to destination file name paths
+        destin_list = file_name_translator(source_list, 
+                                           self.source_file_name_parser,
+                                           self.destin_file_name_parser)
 
-            dest_fileset = FileSet()
-            # check files in the directories
-            for d in dest_directories:
-                dest_fileset += self.file_access_layer.list_destination_directory(d)
+        # return BiDict
+        return BiDict(source_list, destin_list)
 
-            # translate destin. filenames to source filenames
-            dest_fileset = filename_pattern_translator(dest_fileset, 
-                                                       self.destin_file_name_parser,
-                                                       self.source_file_name_parser)
+    def check_destination(self):
+        """
+        """
+        pass
 
+    def check_new(self):
+        """
+        """
+        # check source
 
-            # drop files already at destination
-            fileset = fileset.difference( dest_fileset )
+        # check destination
 
-            # put data into a TransferFileSet container,
-            
-
-        return fileset
+        # return difference
+        pass
 
     def __call__(self,fileset=None):
         if fileset is None:

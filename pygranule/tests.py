@@ -6,8 +6,9 @@ from .pyorbital_layer import PyOrbitalLayer
 from .periodic_granule_filter import PeriodicGranuleFilter
 from .orbital_granule_filter import OrbitalGranuleFilter
 from .local_file_access_layer import LocalFileAccessLayer
-from .file_set import FileSet
-from .transfer_file_set import TransferFileSet
+from .bidict import BiDict
+from .file_transfer_bidict import FileTransferBiDict
+
 from datetime import datetime
 import os
 import shutil
@@ -15,85 +16,110 @@ import shutil
 def make_dummy_file(path):
     open(path, 'w').close()
 
-class TestTransferFileSet(unittest.TestCase):
+class TestFileTransferBiDict(unittest.TestCase):
     def setUp(self):
-        self.sfiles = ['/tmp/pygranule/source1/file1',
-                        '/tmp/pygranule/source1/file2',
-                        '/tmp/pygranule/source2/file3']
-        self.dfiles = ['/tmp/pygranule/destin1/file1',
-                        '/tmp/pygranule/destin1/file2',
-                        '/tmp/pygranule/destin1/file3']
+        # generate test files
+        self.d = {}
+        for i in range(10):
+            a = "/tmp/test_pygranule/source/fileA"+str(i)
+            b = "/tmp/test_pygranule/destin/fileB"+str(i)
+            self.d[a] = b
+        # mkdirs
+        os.mkdir("/tmp/test_pygranule")
+        os.mkdir("/tmp/test_pygranule/source")
+        os.mkdir("/tmp/test_pygranule/destin")
+        # mk dummy files
+        # NOTE: might want to fill the files with some data
+        for key in self.d:
+            make_dummy_file(key)
+        # instance
+        self.lfal = LocalFileAccessLayer()
+        self.ftbd = FileTransferBiDict(self.d.copy(),
+                                       file_access_layer = self.lfal)
+        
+    def tearDown(self):
+        shutil.rmtree("/tmp/test_pygranule")
 
-        self.tfs = TransferFileSet(self.sfiles,self.dfiles)
-
-    def test_paths(self):
+    def test_transfer(self):
         # Run
-        paths = self.tfs.paths()
+        self.ftbd.transfer()
         # Assert
-        self.assertItemsEqual(paths, [(self.sfiles[i],self.dfiles[i]) for i,x in enumerate(self.sfiles)])
+        print os.listdir("/tmp/test_pygranule/destin")
+
+class TestBiDict(unittest.TestCase):
+    def setUp(self):
+        self.d = {"pathA1":"pathB1",
+             "pathA2":"pathB2",
+             "pathA3":"pathB3"}
+        self.bd = BiDict(self.d.copy())
+
+        self.d2 = {"pathA1":"pathB1",
+             "pathA4":"pathB4",
+             "pathA3":"pathB3"}
+        self.bd2 = BiDict(self.d2.copy())
+
+    def test_setitem(self):
+        # Run
+        self.bd["pathA4"] = "pathB4"
+        # Assert
+        result = [ (x,self.bd.fwd[x]) for x in self.bd.fwd ]
+        self.d["pathA4"] = "pathB4"
+        ref = [ (x, self.d[x]) for x in self.d ]
+        self.assertItemsEqual(result, ref)
+
+    def test_delitem(self):
+        # Run
+        del self.bd["pathA2"]
+        # Assert
+        result = [ (x,self.bd.fwd[x]) for x in self.bd.fwd ]
+        del self.d["pathA2"]
+        ref = [ (x, self.d[x]) for x in self.d ]
+        self.assertItemsEqual(result, ref)
+
+    def test_inverse(self):
+        # Run
+        inv = (~self.bd)
+        # Assert
+        for key in self.d:
+            self.assertEqual(inv[self.d[key]] , key)
 
     def test_remove(self):
         # Run
-        self.tfs.remove('file3')
-        paths = self.tfs.paths()
+        self.bd.remove("pathA2")
         # Assert
-        self.sfiles.pop()
-        self.assertItemsEqual(paths, [(self.sfiles[i],self.dfiles[i]) for i,x in enumerate(self.sfiles)])
-
-    def test_add(self):
-        # Run
-        self.tfs.add('/somedir/newfile','/someotherdir/newfile')
-        paths = self.tfs.paths()
-        # Assert
-        self.sfiles.append('/somedir/newfile')
-        self.dfiles.append('/someotherdir/newfile')
-        self.assertItemsEqual(paths, [(self.sfiles[i],self.dfiles[i]) for i,x in enumerate(self.sfiles)]) 
-
-class TestFileSet(unittest.TestCase):
-    def setUp(self):
-        self.files = ["blabla",
-                      "H-000-MSG3__-MSG3________-WV_073___-000009___-201401231300",
-                      "/home/msg/archive/AVHRR/avhrr_20140225_133400_noaa19.hrp.bz2",
-                      "/home/msg/archive/AVHRR/avhrr_20140225_133500_noaa19.hrp.bz2",
-                      "/home/msg/archive/AVHRR/avhrr_20140225_133600_noaa19.hrp.bz2",
-                      "/home/msg/archive/AVHRR/avhrr_20140225_133700_noaa19.hrp.bz2",
-                      "/home/msg/archive/AVHRR/avhrr_20140225_160000_noaa19.hrp.bz2",
-                      "H-000-MSG3__-MSG3________-IR_108___-000003___-201401231300"]
-        self.set = FileSet(self.files)
-        self.set2 = FileSet(self.files[0:5])
-
-    def test_remove(self):
-        # Run
-        self.set.remove("blabla")
-        self.set.remove("H-000-MSG3__-MSG3________-IR_108___-000003___-201401231300")
-        self.set.remove("/home/msg/archive/AVHRR/avhrr_20140225_160000_noaa19.hrp.bz2")
-        self.set.remove("/home/msg/archive/AVHRR/avhrr_20140225_133700_noaa19.hrp.bz2")
-
-        # Assert
-        result = self.set.paths()
-        ref = [self.files[1], self.files[2], self.files[3], self.files[4]]
-        self.assertItemsEqual(result, ref )
-
-    def test_has_file(self):
-        # Run / Assert
-        self.assertTrue( self.set.has_file("H-000-MSG3__-MSG3________-IR_108___-000003___-201401231300") )
-        self.assertFalse( self.set.has_file("H-000-MSG3__-MSG3________-IR_108___-000003") )
-        self.assertTrue( self.set.has_file("/some/other/dir/H-000-MSG3__-MSG3________-IR_108___-000003___-201401231300") )
-        self.assertTrue( self.set.has_file("/home/msg/archive/AVHRR/avhrr_20140225_133500_noaa19.hrp.bz2") )
-        self.assertTrue( self.set.has_file("avhrr_20140225_133500_noaa19.hrp.bz2") )
+        result = [ (x,self.bd.fwd[x]) for x in self.bd.fwd ]
+        del self.d["pathA2"]
+        ref = [ (x, self.d[x]) for x in self.d ]
+        self.assertItemsEqual(result, ref)
 
     def test_difference(self):
         # Run
-        diff_set1 = self.set.difference(self.set2)
-        diff_set2 = self.set2.difference(self.set)
-
+        diff = self.bd.difference(self.bd2)
         # Assert
-        result1 = diff_set1.paths()
-        ref = self.files[5:]
-        self.assertItemsEqual( result1, ref )
+        result = [ (x,diff.fwd[x]) for x in diff.fwd ]
+        del self.d["pathA1"]
+        del self.d["pathA3"]
+        ref = [ (x, self.d[x]) for x in self.d ]
+        self.assertItemsEqual(result, ref)
 
-        result2 = diff_set2.paths()
-        self.assertItemsEqual( result2, [] )
+    def test_update(self):
+        # Run
+        self.bd.update(self.bd2)
+        # Assert
+        result = [ (x, self.bd.fwd[x]) for x in self.bd.fwd ]
+        self.d["pathA4"] = "pathB4"
+        ref = [ (x, self.d[x]) for x in self.d ]
+        self.assertItemsEqual(result, ref)        
+        
+    def test_reduce(self):
+        # Run
+        self.bd.reduce(self.bd2)
+        # Assert
+        result = [ (x, self.bd.fwd[x]) for x in self.bd.fwd ]
+        del self.d["pathA1"]
+        del self.d["pathA3"]
+        ref = [ (x, self.d[x]) for x in self.d ]
+        self.assertItemsEqual(result, ref)        
 
 class TestLocalFileAccessLayer(unittest.TestCase):
     def setUp(self):
@@ -117,7 +143,7 @@ class TestLocalFileAccessLayer(unittest.TestCase):
 
     def test_list_source_directory(self):
         files = self.fal.list_source_directory(self.workdir)
-        self.assertItemsEqual(files.paths(),[self.workdir+'/file1',self.workdir+'/file2',self.workdir+'/file3'])
+        self.assertItemsEqual(files,[self.workdir+'/file1',self.workdir+'/file2',self.workdir+'/file3'])
 
     def test_copy_file(self):
         self.fal.copy_file(self.workdir+"/file1",self.workdir+"/testdir2/file5")
@@ -184,10 +210,9 @@ class TestOrbitalGranuleFilter(unittest.TestCase):
                  "/home/msg/archive/AVHRR/avhrr_20140225_133700_noaa19.hrp.bz2",
                  "/home/msg/archive/AVHRR/avhrr_20140225_160000_noaa19.hrp.bz2",
                  "H-000-MSG3__-MSG3________-IR_108___-000003___-201401231300"]
-        fileset = FileSet(files)
-        result = self.af(fileset)
+        result = self.af(files)
         # Assert
-        self.assertItemsEqual(result.paths(),[files[2],files[3],files[4]])
+        self.assertItemsEqual(result,[files[2],files[3],files[4]])
 
 class TestPeriodicGranuleFilter(unittest.TestCase):
     def setUp(self):
@@ -237,10 +262,9 @@ class TestPeriodicGranuleFilter(unittest.TestCase):
                  "/tmp/seviri/WV_073/H-000-MSG3__-MSG3________-WV_073___-000009___-201401231300",
                  "/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-{0}___-00000{1}___-%Y%m%d%H%M",
                  "/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000003___-201401231300"]
-        fileset = FileSet(files)
-        result = self.af(fileset)
+        result = self.af(files)
         # Assert
-        self.assertItemsEqual(result.paths(),[files[1],files[5]])
+        self.assertItemsEqual(result,[files[1],files[5]])
 
     def test_getitem(self):
         # Run
@@ -252,17 +276,19 @@ class TestPeriodicGranuleFilter(unittest.TestCase):
         # Run
         result = self.af.check_source()
         # Assert
-        self.assertItemsEqual( result.paths(),
-                               ["/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402202300",
-                                "/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402200645"])
+        self.assertTrue(False)
+        #self.assertItemsEqual( result,
+        #                       ["/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402202300",
+        #                        "/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402200645"])
 
     def test_check_source_with_call(self):
         # Run
         result = self.af()
         # Assert
-        self.assertItemsEqual( result.paths(),
-                               ["/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402202300",
-                                "/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402200645"])
+        self.assertTrue(False)
+        #self.assertItemsEqual( result,
+        #                       ["/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402202300",
+        #                        "/tmp/seviri/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402200645"])
 
 class TestFileNameParser(unittest.TestCase):
     def setUp(self):

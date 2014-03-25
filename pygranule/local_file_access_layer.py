@@ -1,6 +1,5 @@
 
 from .file_access_layer import FileAccessLayer
-from .file_set import FileSet
 import os
 import shutil
 
@@ -11,24 +10,22 @@ class LocalFileAccessLayer(FileAccessLayer):
     def list_source_directory(self, directory):
         """
         Lists directory on the source file system
-        Returns a FileSet of filenames including their full
-        paths within the source file system.
+        Returns a list of filename paths.
         E.g. from .list_directory("/home/ftp/data/avhrr/") -->
-        FileSet(["/home/ftp/data/avhrr/avh_noaa19_20140225_1400.hrp.bz2",
+        ["/home/ftp/data/avhrr/avh_noaa19_20140225_1400.hrp.bz2",
          "/home/ftp/data/avhrr/avh_noaa19_20140225_1401.hrp.bz2",
-         "/home/ftp/data/avhrr/avh_noaa19_20140225_1403.hrp.bz2"])
+         "/home/ftp/data/avhrr/avh_noaa19_20140225_1403.hrp.bz2"]
         """
-        return FileSet([ directory + '/' + x for x in os.listdir(directory) if os.path.isfile(directory+'/'+x) ])
+        return [ directory + '/' + x for x in os.listdir(directory) if os.path.isfile(directory+'/'+x) ]
 
     def list_local_directory(self, directory):
         """
         Lists directory on the local file system
-        Returns a list of filenames including their full
-        paths within the source file system.
+        Returns a list of filename paths.
         E.g. from .list_directory("/home/ftp/data/avhrr/") -->
-        FileSet(["/home/ftp/data/avhrr/avh_noaa19_20140225_1400.hrp.bz2",
+        ["/home/ftp/data/avhrr/avh_noaa19_20140225_1400.hrp.bz2",
          "/home/ftp/data/avhrr/avh_noaa19_20140225_1401.hrp.bz2",
-         "/home/ftp/data/avhrr/avh_noaa19_20140225_1403.hrp.bz2"])
+         "/home/ftp/data/avhrr/avh_noaa19_20140225_1403.hrp.bz2"]
         """
         return self.list_source_directory(directory)
 
