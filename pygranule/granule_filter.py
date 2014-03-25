@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from .time_tools import floor_granule_datetime
 from .file_name_parser import FileNameParser, file_name_translator
 from .local_file_access_layer import LocalFileAccessLayer
+from .bidict import BiDict
 
 import os
 
@@ -129,7 +130,7 @@ class GranuleFilter(object):
                                            self.destin_file_name_parser)
 
         # return BiDict
-        return BiDict(source_list, destin_list)
+        return BiDict(dict(zip(source_list, destin_list)))
 
     def check_destination(self):
         """

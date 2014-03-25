@@ -15,7 +15,7 @@ def file_name_translator( filelist_A, parser_A, parser_B ):
         subset = parser_A.subset_from_filename(f_A)
         # generate target filename
         f_B = parser_B.filename(t,subset)
-        filelist_B.append(f_b)
+        filelist_B.append(f_B)
 
     return filelist_B
 

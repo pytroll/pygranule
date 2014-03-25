@@ -55,6 +55,12 @@ class BiDict(object):
         new.bwd = self.bwd.copy()
         return new
 
+    def keys(self):
+        return self.fwd.keys()
+
+    def values(self):
+        return self.fwd.values()
+
     def inverse(self):
         new = self.__class__(bare=True)
         new.fwd = self.bwd
@@ -108,5 +114,5 @@ class BiDict(object):
                 del new_dict[key]
         return new_dict
 
-
+    
 
