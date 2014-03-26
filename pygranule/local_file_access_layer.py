@@ -48,6 +48,13 @@ class LocalFileAccessLayer(FileAccessLayer):
         """
         self.remove_source_file(filename)
 
+    def check_source_file(self, filename):
+        """
+        Checks if file at path filename exists.
+        Returns True or False.
+        """
+        return os.path.isfile(filename)
+
     def check_local_file(self, filename):
         """
         Checks if file at path filename exists.

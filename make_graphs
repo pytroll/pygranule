@@ -2,6 +2,6 @@ pyreverse pygranule/periodic_granule_filter.py pygranule/orbital_granule_filter.
 
 mv classes_No_Name.png GranuleFilter.png
 rm packages_No_Name.png
-pyreverse pygranule/file_set.py pygranule/file_access_layer.py pygranule/granule_filter.py pygranule/orbital_granule_filter.py pygranule/periodic_granule_filter.py pygranule/file_access_layer.py pygranule/ftp_file_access_layer.py pygranule/local_file_access_layer.py pygranule/ssh_file_access_layer.py pygranule/orbital_layer.py pygranule/pyorbital_layer.py -A -s 2 -mn -o png -k
+pyreverse pygranule/file_transfer_bidict.py pygranule/bidict.py pygranule/file_access_layer.py pygranule/granule_filter.py pygranule/orbital_granule_filter.py pygranule/periodic_granule_filter.py pygranule/file_access_layer.py pygranule/ftp_file_access_layer.py pygranule/local_file_access_layer.py pygranule/ssh_file_access_layer.py pygranule/orbital_layer.py pygranule/pyorbital_layer.py -A -s 2 -mn -o png -k
 mv classes_No_Name.png ClassOverview.png
 rm packages_No_Name.png

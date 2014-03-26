@@ -106,15 +106,18 @@ class GranuleFilter(object):
         """
         return True
 
-    def check_source(self):
+    def check_source(self, t = datetime.now()):
         """
-        Lists source directories 'remote filesystem'.
-        returns a validated filename paths as
+        Lists source directorie(s) 'remote filesystem'.
+        Returns validated filename paths as
         BiDict object, mapping source file names
         to the equivalent destination file names.
+
+        If directory pattern contains a date, then
+        the datetime argument must be used.
         """
         # expand pattern to list of source directories
-        directories = self.file_name_parser.directories()
+        directories = self.source_file_name_parser.directories(t = t)
 
         filelist = []
         # check files in the directories
@@ -132,20 +135,51 @@ class GranuleFilter(object):
         # return BiDict
         return BiDict(dict(zip(source_list, destin_list)))
 
-    def check_destination(self):
+    def check_destination(self, t = datetime.now()):
         """
-        """
-        pass
+        Lists destination directorie(s).
+        Returns filename paths as BiDict object, 
+        mapping destination file paths to the 
+        assosiated destination file names.
 
-    def check_new(self):
+        If directory pattern contains a date, then
+        the datetime argument must be used.
         """
+        # expand pattern to list of source directories
+        directories = self.destin_file_name_parser.directories(t = t)
+
+        destin_list = []
+        # check files in the directories
+        for d in directories:
+            destin_list += self.file_access_layer.list_local_directory(d)
+
+        # map file names to source file name paths
+        source_list = file_name_translator(destin_list, 
+                                           self.destin_file_name_parser,
+                                           self.source_file_name_parser)
+        # return BiDict
+        return BiDict(dict(zip(destin_list, source_list)))
+
+    def check_new(self, t = datetime.now() ):
+        """
+        Checks source folders for validated granules and 
+        returns a BiDict of all 'new files', 
+        not found in destination folder. 
+
+        This method is particularly useful in periodic 
+        triggering of fetching any new data.
         """
         # check source
+        source_files = self.check_source(t = t)
 
-        # check destination
+        # check if files at destination
+        for sfile in source_files:
+            dfile = source_files[sfile]
+            if self.file_access_layer.check_local_file(dfile):
+                source_files.remove(sfile)
 
-        # return difference
-        pass
+        # return remaining files as BiDict
+        return source_files
 
     def __call__(self,fileset=None):
         if fileset is None:
