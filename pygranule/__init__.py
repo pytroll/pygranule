@@ -1,5 +1,6 @@
 
 import os
+from . import testsA
 from .file_name_parser import FileNameParser
 
 from .granule_filter import GranuleFilterError

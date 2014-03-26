@@ -1,1 +1,8 @@
-PYGRANULE_CONFIG_PATH=$PWD/etc python -m unittest -v pygranule.tests
+echo ""
+echo "UNITTESTS:"
+echo "=============================================================="
+PYGRANULE_CONFIG_PATH=$PWD/etc python -m unittest discover -v -s ./pygranule/testsA/unittests
+echo ""
+echo "INTEGRATION TESTS:"
+echo "=============================================================="
+PYGRANULE_CONFIG_PATH=$PWD/etc python -m unittest discover -v -s ./pygranule/testsA/integrationtests
