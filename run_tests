@@ -1,8 +1,8 @@
 echo ""
 echo "UNITTESTS:"
 echo "=============================================================="
-PYGRANULE_CONFIG_PATH=$PWD/etc python -m unittest discover -v -s ./pygranule/testsA/unittests
+PYGRANULE_CONFIG_PATH=$PWD/etc python -m unittest discover -v -s ./pygranule/tests/unittests
 echo ""
 echo "INTEGRATION TESTS:"
 echo "=============================================================="
-PYGRANULE_CONFIG_PATH=$PWD/etc python -m unittest discover -v -s ./pygranule/testsA/integrationtests
+PYGRANULE_CONFIG_PATH=$PWD/etc python -m unittest discover -v -s ./pygranule/tests/integrationtests

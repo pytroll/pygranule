@@ -5,7 +5,8 @@ import shutil
 
 class LocalFileAccessLayer(FileAccessLayer):
     def __init__(self):
-        pass
+        self.os = os
+        self.shutil = shutil
 
     def list_source_directory(self, directory):
         """
@@ -16,7 +17,7 @@ class LocalFileAccessLayer(FileAccessLayer):
          "/home/ftp/data/avhrr/avh_noaa19_20140225_1401.hrp.bz2",
          "/home/ftp/data/avhrr/avh_noaa19_20140225_1403.hrp.bz2"]
         """
-        return [ directory + '/' + x for x in os.listdir(directory) if os.path.isfile(directory+'/'+x) ]
+        return [ directory + '/' + x for x in self.os.listdir(directory) if self.os.path.isfile(directory+'/'+x) ]
 
     def list_local_directory(self, directory):
         """
@@ -34,13 +35,13 @@ class LocalFileAccessLayer(FileAccessLayer):
         Copes a single file from source path to destination.
         Destination must be a path within the local file system.
         """
-        shutil.copyfile(source, destination)
+        self.shutil.copyfile(source, destination)
 
     def remove_source_file(self, filename):
         """
         Deletes a single file at source.
         """
-        os.remove(filename)
+        self.os.remove(filename)
 
     def remove_local_file(self, filename):
         """
@@ -53,12 +54,12 @@ class LocalFileAccessLayer(FileAccessLayer):
         Checks if file at path filename exists.
         Returns True or False.
         """
-        return os.path.isfile(filename)
+        return self.os.path.isfile(filename)
 
     def check_local_file(self, filename):
         """
         Checks if file at path filename exists.
         Returns True or False.
         """
-        return os.path.isfile(filename)
+        return self.os.path.isfile(filename)
 
