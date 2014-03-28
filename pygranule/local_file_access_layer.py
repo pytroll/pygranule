@@ -1,12 +1,9 @@
 
 from .file_access_layer import FileAccessLayer
-import os
-import shutil
 
 class LocalFileAccessLayer(FileAccessLayer):
     def __init__(self):
-        self.os = os
-        self.shutil = shutil
+        FileAccessLayer.__init__(self)
 
     def list_source_directory(self, directory):
         """
@@ -17,18 +14,7 @@ class LocalFileAccessLayer(FileAccessLayer):
          "/home/ftp/data/avhrr/avh_noaa19_20140225_1401.hrp.bz2",
          "/home/ftp/data/avhrr/avh_noaa19_20140225_1403.hrp.bz2"]
         """
-        return [ directory + '/' + x for x in self.os.listdir(directory) if self.os.path.isfile(directory+'/'+x) ]
-
-    def list_local_directory(self, directory):
-        """
-        Lists directory on the local file system
-        Returns a list of filename paths.
-        E.g. from .list_directory("/home/ftp/data/avhrr/") -->
-        ["/home/ftp/data/avhrr/avh_noaa19_20140225_1400.hrp.bz2",
-         "/home/ftp/data/avhrr/avh_noaa19_20140225_1401.hrp.bz2",
-         "/home/ftp/data/avhrr/avh_noaa19_20140225_1403.hrp.bz2"]
-        """
-        return self.list_source_directory(directory)
+        return self.list_local_directory(directory)
 
     def copy_file(self, source, destination):
         """
@@ -41,25 +27,13 @@ class LocalFileAccessLayer(FileAccessLayer):
         """
         Deletes a single file at source.
         """
-        self.os.remove(filename)
+        self.remove_local_file(filename)
 
-    def remove_local_file(self, filename):
-        """
-        Deletes a single file at source.
-        """
-        self.remove_source_file(filename)
-
-    def check_source_file(self, filename):
+    def check_for_source_file(self, filename):
         """
         Checks if file at path filename exists.
         Returns True or False.
         """
-        return self.os.path.isfile(filename)
+        return self.check_for_local_file(filename)
 
-    def check_local_file(self, filename):
-        """
-        Checks if file at path filename exists.
-        Returns True or False.
-        """
-        return self.os.path.isfile(filename)
 
