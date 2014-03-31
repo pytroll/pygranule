@@ -3,6 +3,8 @@ import numpy as np
 from pyproj import Proj
 from shapely import geometry
 
+from abc import ABCMeta, abstractmethod
+
 class OrbitalLayerError(Exception):
     def __init__(self,value):
         self.value = value
@@ -16,6 +18,8 @@ class OrbitalLayer(object):
     pyorbital. This forms a convenient layer (model) between
     getsat and the orbital module.
     """
+    __metaclass__ = ABCMeta
+
     instrument_info_db = {'AVHRR':{'scan_steps':2048}}
     earth_radius = 6.37e6
     proj_out_of_bounds_value = 1.0e30
@@ -31,6 +35,7 @@ class OrbitalLayer(object):
         self.working_projection = {'proj':'ortho', 'lon_0':clon, 'lat_0':clat}
         self.proj = Proj(**self.working_projection)
 
+    @abstractmethod
     def next_transit(self, start=datetime.now(), resolution=100):
         """
         Next transit time relative to center of aoi.
@@ -61,7 +66,11 @@ class OrbitalLayer(object):
                     return t, f
             raise Exception('AOI Sampling exceeded search limit')
 
+    @abstractmethod
     def orbital_period(self):
+        """
+        Orbital period in floating point minutes.
+        """
         pass
 
     def swath_lonlats(self, start, period=None):
@@ -100,6 +109,7 @@ class OrbitalLayer(object):
         return np.array((lons,lats))
 
 
+    @abstractmethod
     def scan_line_lonlats(self, t):
         """
         Returns a single instrument scan line starting at datetime t
@@ -260,6 +270,7 @@ class OrbitalLayer(object):
         ## swath and aoi intersection will be evaluated in projection (e.g. orthographic).
         return sum(self.aoi[0])/len(self.aoi[0]), sum(self.aoi[1])/len(self.aoi[1])
 
+    @abstractmethod
     def set_tle(self, line1, line2):
         """
         Use to apply a particular two line element.

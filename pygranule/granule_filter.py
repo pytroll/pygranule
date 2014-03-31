@@ -6,6 +6,8 @@ from .file_name_parser import FileNameParser, file_name_translator
 from .local_file_access_layer import LocalFileAccessLayer
 from .bidict import BiDict
 
+from abc import ABCMeta, abstractmethod
+
 import os
 
 class GranuleFilter(object):
@@ -14,6 +16,7 @@ class GranuleFilter(object):
     class that holds acquisition definitions
     filters satellite granules.
     """
+    __metaclass__ = ABCMeta
     def __init__(self,input_config):
         GranuleFilter.id += 1
         # declare config attributes
@@ -99,12 +102,21 @@ class GranuleFilter(object):
                 f.append(path)
         return f
 
+    @abstractmethod
+    def show(self, filepaths):
+        """
+        If provided, shows an image for the area extent of the granules,
+        and the target area.
+        """
+        pass
+
+    @abstractmethod
     def check_sampling_from_time(self, start, period=None):
         """
         Function to be overridden by extended orbital granule versions of this class.
-        Default behaviour is to return True.
+        Returns True or False
         """
-        return True
+        pass
 
     def check_source(self, t = datetime.now()):
         """
@@ -175,7 +187,7 @@ class GranuleFilter(object):
         # check if files at destination
         for sfile in source_files:
             dfile = source_files[sfile]
-            if self.file_access_layer.check_local_file(dfile):
+            if self.file_access_layer.check_for_local_file(dfile):
                 source_files.remove(sfile)
 
         # return remaining files as BiDict
@@ -207,16 +219,6 @@ class GranuleFilter(object):
         else:
             return self.config[key]
 
-    def get_subset_dict(self):
-        """ returns subset strings as dictionary tree """
-        conf = self._validated_config('subsets')
-        if conf is None:
-            return None
-        else:
-            subset_dict = _dict_subset_expression(conf)
-            
-            return subset_dict
-
     def get_time_step(self):
         str_splt = self._validated_config("time_step").split(":")
         h = int(str_splt[0])
@@ -243,7 +245,6 @@ class GranuleFilter(object):
 
 
 
-    
 class GranuleFilterError(Exception):
     def __init__(self,value):
         self.value = value

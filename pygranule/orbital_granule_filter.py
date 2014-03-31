@@ -21,3 +21,13 @@ class OrbitalGranuleFilter(GranuleFilter):
         
         return self.orbital_layer.does_swath_sample_aoi(start,period)
 
+    def show(self, filepaths):
+        """
+        Shows an image for the area extent of the granules,
+        and the target area.
+        """
+        dt = self.get_time_step()
+        for f in filepaths:
+            t = self.source_file_name_parser.time_from_filename(f)
+            self.orbital_layer.show_swath(t, period=dt.total_seconds()/60.0)
+        
