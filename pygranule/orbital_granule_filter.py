@@ -27,7 +27,9 @@ class OrbitalGranuleFilter(GranuleFilter):
         and the target area.
         """
         dt = self.get_time_step()
+        t = []
         for f in filepaths:
-            t = self.source_file_name_parser.time_from_filename(f)
-            self.orbital_layer.show_swath(t, period=dt.total_seconds()/60.0)
+            t.append(self.source_file_name_parser.time_from_filename(f))
+        
+        self.orbital_layer.show_swath(t, period=dt.total_seconds()/60.0)
         

@@ -1,0 +1,4 @@
+echo ""
+echo "SYSTEM TESTS:"
+echo "=============================================================="
+PYGRANULE_CONFIG_PATH=$PWD/etc python -m unittest discover -v -s ./pygranule/tests/systemtests

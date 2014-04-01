@@ -211,40 +211,52 @@ class OrbitalLayer(object):
 
     def swath_polygon(self, start, period=None):
         segments = self.swath_working_projection(start,period=period)
-        if len(segments) == 0:
-            # empty polygon
-            return geometry.Polygon()
-        elif len(segments) == 1:
-            return geometry.Polygon(segments[0].transpose().tolist())
-        else:
-            P = geometry.Polygon(segments[0].transpose().tolist())
-            for i in range(1,len(segments)):
-                P = P.union( geometry.Polygon(
-                        segments[i].transpose().tolist()) )
+        try:
+            if len(segments) == 0:
+                # empty polygon
+                return geometry.Polygon()
+            elif len(segments) == 1:
+                return geometry.Polygon(segments[0].transpose().tolist())
+            else:
+                P = geometry.Polygon(segments[0].transpose().tolist())
+                for i in range(1,len(segments)):
+                    P = P.union( geometry.Polygon(
+                            segments[i].transpose().tolist()) )
             return P
+        except ValueError:
+            # empty polygon if invalid polygon created
+            return geometry.Polygon()
 
     def aoi_polygon(self):
         xys = np.array(self.proj(*self.aoi))
         return geometry.Polygon(xys.transpose().tolist())
 
     def show_swath(self, start, period=None):
-        # fetch the coordinates
-        xys_segs = self.swath_working_projection(start, period)
-        (aoix,aoiy) = self.proj(*self.aoi)
+        """
+        A helper method that displays the orbital swath
+        starting at datetime start, for a period number of minutes.
+        If, start is iterable, then the method assumes it is an iterable
+        of datetimes, plotting a number of swaths at those times.
+        """
+        # test if start is iterable, EAFP style:
+        try:
+            for e in start:
+                pass
+        except TypeError:
+            start = [start]
 
         import matplotlib.pyplot as plt
 
-        Re = self.earth_radius
+        # fetch the coordinates
+        (aoix,aoiy) = self.proj(*self.aoi)
+        
+        # plot AOI
         plt.axis('equal')
-        print aoix
-        print aoiy
         plt.plot(aoix,aoiy,'r-')
         plt.plot((aoix[-1],aoix[0]),(aoiy[-1],aoiy[0]),'r-')
-        
-        for xys in xys_segs:
-            plt.plot(xys[0],xys[1],'b-')
-            plt.plot((xys[0][-1],xys[0][0]),(xys[1][-1],xys[1][0]),'b-')
 
+        # plot Earth
+        Re = self.earth_radius
         circle=plt.Circle((0,0),Re,color='g',fill=False)
         fig = plt.gcf()
         fig.gca().add_artist(circle)
@@ -252,6 +264,14 @@ class OrbitalLayer(object):
         plt.xlim((-1.5*Re,1.5*Re))
         plt.ylim((-1.5*Re,1.5*Re))
 
+        # Plot granules
+        for t in start:
+            # fetch the coordinates
+            xys_segs = self.swath_working_projection(t, period)
+            for xys in xys_segs:
+                plt.plot(xys[0],xys[1],'b-')
+                plt.plot((xys[0][-1],xys[0][0]),(xys[1][-1],xys[1][0]),'b-')
+                
         plt.show()
 
         #from mpl_toolkits.basemap import Basemap
