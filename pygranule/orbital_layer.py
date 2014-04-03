@@ -285,6 +285,48 @@ class OrbitalLayer(object):
         #m.drawmeridians(np.arange(-180.,180.,5.), labels=[0,1,0,1],fontsize=10, dashes=[1, 0], color=[0.8,0.8,0.8], zorder=2)
         #plt.show()
 
+    def show_swath_pycoast(self, start, period=None):
+        """
+        A helper method that displays the orbital swath
+        starting at datetime start, for a period number of minutes.
+        If, start is iterable, then the method assumes it is an iterable
+        of datetimes, plotting a number of swaths at those times.
+        """
+        # test if start is iterable, EAFP style:
+        try:
+            for e in start:
+                pass
+        except TypeError:
+            start = [start]
+
+
+        from PIL import Image
+        from pycoast import ContourWriterAGG
+        img = Image.new('RGB', (650, 650))
+        proj4_string = ""
+        for x in self.working_projection:
+            proj4_string += "+%s=%s "%(x,self.working_projection[x])
+        area_extent = (-6700000.0, -6700000.0, 6700000.0, 6700000.0)
+        area_def = (proj4_string, area_extent)
+        cw = ContourWriterAGG('/home/sat/share/GSHHS')
+
+        cw.add_grid(img, area_def, (10.0,10.0),(2.0,2.0), fill='blue',
+                    outline='gray', outline_opacity=130, minor_outline=None, write_text=False)
+        cw.add_coastlines(img, area_def, resolution='l')
+        
+        # Plot granules
+        for t in start:
+            # fetch the coordinates
+            xys_segs = self.swath_working_projection(t, period)
+            for xys in xys_segs:
+                lls = self.proj(xys[0],xys[1],inverse=True)
+                cw.add_polygon(img, area_def, zip(lls[0], lls[1]), outline="blue", fill="blue", fill_opacity=100, width=1)
+
+        cw.add_polygon(img, area_def, zip(*self.aoi), outline="red", fill="red", fill_opacity=100, width=2)
+
+
+        img.show()                
+
     def aoi_center(self):
         ## eventually do this in projection coordinate space instead.
         ## swath and aoi intersection will be evaluated in projection (e.g. orthographic).

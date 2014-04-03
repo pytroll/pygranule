@@ -31,5 +31,15 @@ class OrbitalGranuleFilter(GranuleFilter):
         for f in filepaths:
             t.append(self.source_file_name_parser.time_from_filename(f))
         
-        self.orbital_layer.show_swath(t, period=dt.total_seconds()/60.0)
-        
+        # select plotting routine depending if 
+        # pycoast version has add_polygon
+        try:
+            from pycoast import ContourWriterAGG
+            if hasattr( ContourWriterAGG, 'add_polygon'):
+                self.orbital_layer.show_swath_pycoast(t, period=dt.total_seconds()/60.0)
+            else:
+                raise ImportError
+        except ImportError:
+            self.orbital_layer.show_swath(t, period=dt.total_seconds()/60.0)
+
+
