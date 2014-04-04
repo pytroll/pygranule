@@ -16,7 +16,7 @@ satellite data granules.
 The source code of the package can be found at google codes, googlecode_
 
 .. image:: images/demo.png
-        :width: 70%
+        :width: 95%
 	:align: center
 
 .. _googlecode: http://code.google.com/p/get-sat/
