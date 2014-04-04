@@ -1,6 +1,6 @@
 from pygranule.file_access_layer import FileAccessLayer, FileAccessLayerError
 import paramiko
-
+import stat
 
 class SSHFileAccessLayer(FileAccessLayer):
     
@@ -13,13 +13,19 @@ class SSHFileAccessLayer(FileAccessLayer):
         self.password = password
 
     def list_source_directory(self, directory):
+        directory = directory.rstrip("/")
         try:
             t = paramiko.Transport((self.hostname, self.port))
             t.connect(username=self.username, password=self.password)
             sftp = paramiko.SFTPClient.from_transport(t)
-            files = sftp.listdir(directory)
-            return files
+            
+            files = []
+            for x in sftp.listdir_attr(directory):
+                if stat.S_IFMT(x.st_mode) != stat.S_IFDIR:
+                    files.append(directory + "/" + x.filename)
+                        
             t.close()
+            return files
         except:
             raise FileAccessLayerError("Failed to list source")
         finally:
