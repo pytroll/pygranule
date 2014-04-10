@@ -308,7 +308,7 @@ class OrbitalLayer(object):
             proj4_string += "+%s=%s "%(x,self.working_projection[x])
         area_extent = (-6700000.0, -6700000.0, 6700000.0, 6700000.0)
         area_def = (proj4_string, area_extent)
-        cw = ContourWriterAGG('/home/sat/share/GSHHS')
+        cw = ContourWriterAGG()
 
         cw.add_grid(img, area_def, (10.0,10.0),(2.0,2.0), fill='blue',
                     outline='gray', outline_opacity=130, minor_outline=None, write_text=False)
@@ -323,8 +323,6 @@ class OrbitalLayer(object):
                 cw.add_polygon(img, area_def, zip(lls[0], lls[1]), outline="blue", fill="blue", fill_opacity=100, width=1)
 
         cw.add_polygon(img, area_def, zip(*self.aoi), outline="red", fill="red", fill_opacity=100, width=2)
-
-
         img.show()                
 
     def aoi_center(self):
