@@ -62,6 +62,11 @@ class BiDict(object):
         return self.fwd.values()
 
     def inverse(self):
+        """
+        Returns an inverse BiDict of itself.
+        Data is still referenced from parent object.
+        Useful for listing data in reverse direction.
+        """
         new = self.__class__(bare=True)
         new.fwd = self.bwd
         new.bwd = self.fwd
@@ -71,6 +76,7 @@ class BiDict(object):
         val = self.fwd[key]
         del self.bwd[val]
         del self.fwd[key]
+        return self
 
     def reduce(self, external_dict):
         """
@@ -83,6 +89,7 @@ class BiDict(object):
             if key in self.fwd:
                 del self.bwd[self.fwd[key]]
                 del self.fwd[key]
+        return self
 
     def update(self, external_dict):
         """
@@ -102,6 +109,7 @@ class BiDict(object):
             else:
                 self.fwd[key] = external_dict[key]
                 self.bwd[self.fwd[key]] = key
+        return self
 
     def difference(self, external_dict):
         """

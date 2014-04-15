@@ -14,6 +14,10 @@ class PyOrbitalLayer(OrbitalLayer):
     """
     pyorbital based orbital layer
     """
+
+    __implements__ = (OrbitalLayer,)
+
+
     def __init__(self, aoi, sat, instrument="AVHRR"):
         OrbitalLayer.__init__(self,aoi,sat,instrument)
         # instantiate orbital module

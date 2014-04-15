@@ -1,5 +1,6 @@
 
 from pygranule import OrbitalGranuleFilter
+from pygranule.bidict import BiDict
 import unittest
 
 from datetime import datetime, timedelta
@@ -25,6 +26,11 @@ class TestOrbitalGranuleFilter(unittest.TestCase):
         for i in range(120):
             self.files += self.gf.source_file_name_parser.filenames_from_time(t+i*dt)
 
+        self.bidict = BiDict()
+        for i in range(120):
+            fn = self.gf.source_file_name_parser.filenames_from_time(t+i*dt)[0]
+            self.bidict[fn] = fn
+
     def test_show_granules(self):
         """
         Plot and display granules found in input file list.
@@ -35,7 +41,7 @@ class TestOrbitalGranuleFilter(unittest.TestCase):
         # show all the granules
         gf.show( files )
 
-        # show only filtered granules
-        gf( files ).show()
+        # show only filtered granules (DOING SOME RE-OPERATION TESTS)
+        self.gf(self.bidict).filter().show()
         
 

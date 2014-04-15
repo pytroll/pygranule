@@ -14,13 +14,25 @@ class GranuleBiDict(BiDict):
         Extension to bidict, holding a reference to its
         GranuleFilter parent object.
         Additional routines, such as plot, and file transfer
-        are implemented through the parent.
+        are implemented through callback to the parent granule filter.
         """
         BiDict.__init__(self, dictionary, bare)
         self.gf_parent = gf_parent
         
     def show(self):
+        """
+        Show this set of filepaths using
+        the parent GranuleFilter.
+        """
         self.gf_parent.show(self)
+        return self
+
+    def filter(self):
+        """
+        Filter this set of filepaths using
+        the parent GranuleFilter.
+        """
+        return self.gf_parent(self)
 
     def transfer(self):
         """

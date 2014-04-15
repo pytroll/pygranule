@@ -4,6 +4,9 @@ from .granule_filter import GranuleFilter
 from .pyorbital_layer import PyOrbitalLayer
 
 class OrbitalGranuleFilter(GranuleFilter):
+    
+    __implements__ = (GranuleFilter,)
+
     def __init__(self, input_config):
         GranuleFilter.__init__(self, input_config)
         # instanciate orbital layer
