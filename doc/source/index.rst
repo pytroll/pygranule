@@ -44,8 +44,10 @@ e.g., show all the granules,
     >>> gf.show( files )
 
 or filter the granules, allowing only those that match the configuration,
+returns an iterable file paths container but with a handle back to the
+parent filter, allowing handy attributes such as, :attr:`.show()`,
 
-    >>> gf.show( gf( files ) )
+    >>> gf( files ).show()
 
 Off course granule filter will be able to do much much more ...
 

@@ -5,6 +5,7 @@ from .time_tools import floor_granule_datetime
 from .file_name_parser import FileNameParser, file_name_translator
 from .local_file_access_layer import LocalFileAccessLayer
 from .bidict import BiDict
+from .granule_bidict import GranuleBiDict
 
 from abc import ABCMeta, abstractmethod
 
@@ -57,13 +58,18 @@ class GranuleFilter(object):
             
 
         # instanciate source file name parser
-        self.file_name_parser = FileNameParser(self.config['file_source_pattern'],
-                                               self.config['subsets'])
-        self.source_file_name_parser = self.file_name_parser
+        self.source_file_name_parser = None
+        self.file_name_parser = None
+        if self.config['file_source_pattern'] is not None:
+            self.file_name_parser = FileNameParser(self.config['file_source_pattern'],
+                                                   self.config['subsets'])
+            self.source_file_name_parser = self.file_name_parser
 
         # instanciate destination file name parser
-        self.destin_file_name_parser = FileNameParser(self.config['file_destination_pattern'],
-                                                      self.config['subsets'])
+        self.destin_file_name_parser = None
+        if self.config['file_destination_pattern'] is not None:
+            self.destin_file_name_parser = FileNameParser(self.config['file_destination_pattern'],
+                                                          self.config['subsets'])
 
         # instanciate file access parser, if set
         if self.config['protocol'] == "local":
@@ -96,11 +102,38 @@ class GranuleFilter(object):
         Filters a list of input file paths, returning
         only those that pass the validator test (see validate).
         """
-        f = []
+        reduced_list = []
         for path in filepaths:
             if self.validate(path):
-                f.append(path)
-        return f
+                reduced_list.append(path)
+
+        # map to destination file name paths
+        destin_list = self.translate(reduced_list)
+
+        if destin_list is None:
+            pairs = dict( (x,None) for i, x in enumerate(reduced_list) )
+        else:
+            pairs = dict( (x,destin_list[i]) for i, x in enumerate(reduced_list) )   
+        
+        # return flexible GranuleBiDict
+        return GranuleBiDict(pairs, gf_parent=self)
+
+    def translate(self, filepaths, reverse=False):
+        """
+        Translate source file name to destination filename
+        """
+        if self.destin_file_name_parser is not None and self.source_file_name_parser is not None:
+            if reverse:
+                return file_name_translator(filepaths, 
+                                            self.destin_file_name_parser,
+                                            self.source_file_name_parser)
+            else:
+                return file_name_translator(filepaths, 
+                                            self.source_file_name_parser,
+                                            self.destin_file_name_parser)
+        else:
+            return None
+
 
     @abstractmethod
     def show(self, filepaths):

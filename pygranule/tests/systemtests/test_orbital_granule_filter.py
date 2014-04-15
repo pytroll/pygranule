@@ -36,5 +36,6 @@ class TestOrbitalGranuleFilter(unittest.TestCase):
         gf.show( files )
 
         # show only filtered granules
-        self.gf.show( gf( files ) )
+        gf( files ).show()
+        
 
