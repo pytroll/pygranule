@@ -2,6 +2,9 @@
 from .file_access_layer import FileAccessLayer
 
 class LocalFileAccessLayer(FileAccessLayer):
+
+    __implements__ = (FileAccessLayer,)
+
     def __init__(self):
         FileAccessLayer.__init__(self)
 

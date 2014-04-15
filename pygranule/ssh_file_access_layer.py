@@ -4,9 +4,10 @@ import stat
 
 class SSHFileAccessLayer(FileAccessLayer):
     
+    __implements__ = (FileAccessLayer,)
+
     def __init__(self, hostname, username, password=None, port=22):
         FileAccessLayer.__init__(self)
-
         self.hostname = hostname
         self.username = username
         self.port = port
