@@ -13,7 +13,7 @@ class TestOrbitalGranuleFilter(unittest.TestCase):
                   'file_source_pattern':"/home/msg/archive/AVHRR/avhrr_%Y%m%d_%H%M00_noaa19.hrp.bz2",
                   'time_step':"00:01:00",
                   'time_step_offset':"00:00:00",
-                  'area_of_interest':"(-25,62.5),(-25,67),(-13,67),(-13,62.5)"}
+                  'area_of_interest':"(0.0,73.0),(0.0,61.0),(-30.0,61.0),(-39,63.5),(-55.666,63.5),(-57.75,65),(-76,76),(-75,78),(-60,82),(0,90),(30,82),(0,82)"}
         self.gf = OrbitalGranuleFilter(config)
         # override orbital_layer with a particular TLE orbital element.
         self.gf.orbital_layer.set_tle("1 29499U 06044A   11254.96536486  .00000092  00000-0  62081-4 0  5221",

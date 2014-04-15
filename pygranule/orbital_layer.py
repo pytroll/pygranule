@@ -322,9 +322,7 @@ class OrbitalLayer(object):
                 lls = self.proj(xys[0],xys[1],inverse=True)
                 cw.add_polygon(img, area_def, zip(lls[0], lls[1]), outline="blue", fill="blue", fill_opacity=100, width=1)
 
-        cw.add_polygon(img, area_def, zip(*self.aoi), outline="red", fill="red", fill_opacity=100, width=2)
-
-
+        cw.add_polygon(img, area_def, zip(*self.aoi), outline="red", fill="red", fill_opacity=70, width=2)
         img.show()                
 
     def aoi_center(self):

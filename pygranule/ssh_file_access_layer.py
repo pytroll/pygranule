@@ -14,22 +14,22 @@ class SSHFileAccessLayer(FileAccessLayer):
 
     def list_source_directory(self, directory):
         directory = directory.rstrip("/")
+        files = []
         try:
             t = paramiko.Transport((self.hostname, self.port))
-            t.connect(username=self.username, password=self.password)
-            sftp = paramiko.SFTPClient.from_transport(t)
-            
-            files = []
-            for x in sftp.listdir_attr(directory):
-                if stat.S_IFMT(x.st_mode) != stat.S_IFDIR:
-                    files.append(directory + "/" + x.filename)
-                        
-            t.close()
-            return files
+            try:
+                t.connect(username=self.username, password=self.password)
+                sftp = paramiko.SFTPClient.from_transport(t)
+                
+                for x in sftp.listdir_attr(directory):
+                    if stat.S_IFMT(x.st_mode) != stat.S_IFDIR:
+                        files.append(directory + "/" + x.filename)
+            finally:
+                t.close()
         except:
             raise FileAccessLayerError("Failed to list source")
-        finally:
-            t.close()
+
+        return files
 
     def copy_file(self, source, destination):
         pass
