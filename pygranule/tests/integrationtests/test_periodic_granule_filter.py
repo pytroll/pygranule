@@ -71,13 +71,13 @@ class TestPeriodicGranuleFilter(unittest.TestCase):
 
     def test_check_source(self):
         # Run
-        result = self.af.check_source()
+        result = self.af.list_source()
         # Assert
         self.assertItemsEqual( zip(result.keys(),result.values()),
                                [('/tmp/test_pygranule/source/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402202300', '/tmp/test_pygranule/destin/IR_108_5_201402202300'),
                                 ('/tmp/test_pygranule/source/IR_108/H-000-MSG3__-MSG3________-IR_108___-000005___-201402200645', '/tmp/test_pygranule/destin/IR_108_5_201402200645')] )
         
-    def test_check_source_with_call(self):
+    def test_list_source_with_call(self):
         # Run
         result = self.af()
         # Assert

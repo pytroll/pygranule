@@ -1,6 +1,6 @@
 
 
-from .granule_filter import GranuleFilter
+from .granule_filter import GranuleFilter, GranuleFilterError
 from .pyorbital_layer import PyOrbitalLayer
 
 class OrbitalGranuleFilter(GranuleFilter):
@@ -11,8 +11,9 @@ class OrbitalGranuleFilter(GranuleFilter):
         GranuleFilter.__init__(self, input_config)
         # instanciate orbital layer
         aoi = self.get_aoi()
-        sat = self._validated_config("sat_name")
-        self.orbital_layer = PyOrbitalLayer(aoi,sat)
+        sat = self.config["sat_name"]
+        ins = self.config["instrument"]
+        self.orbital_layer = PyOrbitalLayer(aoi, sat, instrument=ins)
 
     def check_sampling_from_time(self, start, period=None):
         """
@@ -46,3 +47,29 @@ class OrbitalGranuleFilter(GranuleFilter):
             self.orbital_layer.show_swath(t, period=dt.total_seconds()/60.0)
 
 
+    def fill_sampling(self, filepath):
+        """
+        Given a valid filepath, returns full set of filepaths 
+        that complete this satellite pass, subsets and granules
+        that intersect the AOI.
+        """
+        # make sure filepath is validated
+        if self.validate( filepath ) is False:
+            raise GranuleFilterError("Fill sampling requires a validated filepath")
+
+        # add full subset to pass
+        t = self.source_file_name_parser.time_from_filename(filepath)
+        full_sample = self.source_file_name_parser.filenames_from_time(t)
+
+        # step outwards, recording granules that intersect AOI,
+        dt = self.get_time_step()
+        # step 1/4 an orbit in either direction to look for pass granules
+        n_steps = int( self.orbital_layer.orbital_period()/(dt.total_seconds()/60)/4.0 )
+        for i in range(n_steps):
+            if self.check_sampling_from_time(t+i*dt):
+                full_sample += self.source_file_name_parser.filenames_from_time(t+i*dt)
+            if self.check_sampling_from_time(t-i*dt):
+                full_sample += self.source_file_name_parser.filenames_from_time(t-i*dt)
+
+        # return result as GranuleBiDict
+        return self.translate(full_sample)

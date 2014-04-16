@@ -20,7 +20,8 @@ class OrbitalLayer(object):
     """
     __metaclass__ = ABCMeta
 
-    instrument_info_db = {'AVHRR':{'scan_steps':2048}}
+    instrument_info_db = {'AVHRR':{'scan_steps':2048},
+                          'MODIS':{}}
     earth_radius = 6.37e6
     proj_out_of_bounds_value = 1.0e30
 

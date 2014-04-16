@@ -1,5 +1,6 @@
 
 from .granule_filter import GranuleFilter
+from .granule_bidict import GranuleBiDict
 
 class PeriodicGranuleFilter(GranuleFilter):
 
@@ -22,3 +23,14 @@ class PeriodicGranuleFilter(GranuleFilter):
         and the target area. Not implemented for PeriodicGranuleFilter.
         """
         raise NotImplementedError
+
+    def fill_sampling(self, filepath):
+        """
+        Given a valid filepath, returns full set of filepaths 
+        that complete this periodic sampling.
+        """
+        t = self.source_file_name_parser.time_from_filename(filepath)
+        full_sample = self.source_file_name_parser.filenames_from_time(t)
+        # return result as GranuleBiDict
+        return self.translate(full_sample)
+        

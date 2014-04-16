@@ -26,6 +26,7 @@ class GranuleFilter(object):
             ('config_name',None),
             ('sat_name',None),
             ('sat_id',None),
+            ('instrument',None),
             ('type',None),
             ('protocol',None),
             ('server',None),
@@ -107,20 +108,25 @@ class GranuleFilter(object):
             if self.validate(path):
                 reduced_list.append(path)
 
-        # map to destination file name paths
-        destin_list = self.translate(reduced_list)
-
-        if destin_list is None:
-            pairs = dict( (x,None) for i, x in enumerate(reduced_list) )
-        else:
-            pairs = dict( (x,destin_list[i]) for i, x in enumerate(reduced_list) )   
+        # returned GranuleBiDict
+        return self.translate(reduced_list)
         
-        # return flexible GranuleBiDict
-        return GranuleBiDict(pairs, gf_parent=self)
-
     def translate(self, filepaths, reverse=False):
         """
-        Translate source file name to destination filename
+        Translate input list of filepaths to destination.
+        Return result as GranuleBiDict.
+        """
+        destin_list = self._translate(filepaths, reverse=reverse)
+        if destin_list is None:
+            pairs = dict( (x,None) for i, x in enumerate(filepaths) )
+        else:
+            pairs = dict( (x,destin_list[i]) for i, x in enumerate(filepaths) )   
+        return GranuleBiDict(pairs, gf_parent=self)
+
+
+    def _translate(self, filepaths, reverse=False):
+        """
+        Translate source file name to destination filename list
         """
         if self.destin_file_name_parser is not None and self.source_file_name_parser is not None:
             if reverse:
@@ -136,6 +142,18 @@ class GranuleFilter(object):
 
 
     @abstractmethod
+    def fill_sampling(self, filepath):
+        """
+        Function to be overridden by extended versions of this class.
+        For a valid input filepath, it should fill in the filepaths
+        that complete the sampling as defined by the config.
+        
+        NOTE: In case of orbital type filters, it would fill in all missing 
+        subsets, and granule that complete a satellite pass over the AOI.
+        """
+        pass
+
+    @abstractmethod
     def show(self, filepaths):
         """
         If provided, shows an image for the area extent of the granules,
@@ -146,12 +164,12 @@ class GranuleFilter(object):
     @abstractmethod
     def check_sampling_from_time(self, start, period=None):
         """
-        Function to be overridden by extended orbital granule versions of this class.
+        Function to be overridden by extended an orbital granule version of this class.
         Returns True or False
         """
         pass
 
-    def check_source(self, t = datetime.now()):
+    def list_source(self, t = datetime.now()):
         """
         Lists source directorie(s) 'remote filesystem'.
         Returns validated filename paths as
@@ -180,7 +198,7 @@ class GranuleFilter(object):
         # return BiDict
         return BiDict(dict(zip(source_list, destin_list)))
 
-    def check_destination(self, t = datetime.now()):
+    def list_destination(self, t = datetime.now()):
         """
         Lists destination directorie(s).
         Returns filename paths as BiDict object, 
@@ -205,7 +223,7 @@ class GranuleFilter(object):
         # return BiDict
         return BiDict(dict(zip(destin_list, source_list)))
 
-    def check_new(self, t = datetime.now() ):
+    def list_new(self, t = datetime.now() ):
         """
         Checks source folders for validated granules and 
         returns a BiDict of all 'new files', 
@@ -215,7 +233,7 @@ class GranuleFilter(object):
         triggering of fetching any new data.
         """
         # check source
-        source_files = self.check_source(t = t)
+        source_files = self.list_source(t = t)
 
         # check if files at destination
         for sfile in source_files:
@@ -228,7 +246,7 @@ class GranuleFilter(object):
 
     def __call__(self,fileset=None):
         if fileset is None:
-            return self.check_source()
+            return self.list_source()
         else:
             return self.filter(fileset)
 
