@@ -11,6 +11,7 @@ class TestOrbitalGranuleFilter(unittest.TestCase):
         # instantiate 
         config = {'config_name':"DummySatData",
                   'sat_name':"NOAA 19",
+                  'instrument':"AVHRR",
                   'file_source_pattern':"/home/msg/archive/AVHRR/avhrr_%Y%m%d_%H%M00_noaa19.hrp.bz2",
                   'time_step':"00:01:00",
                   'time_step_offset':"00:00:00",
