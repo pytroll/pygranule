@@ -47,7 +47,7 @@ class OrbitalGranuleFilter(GranuleFilter):
             self.orbital_layer.show_swath(t, period=dt.total_seconds()/60.0)
 
 
-    def fill_sampling(self, filepath):
+    def fill_sampling(self, filepath, contiguous=True):
         """
         Given a valid filepath, returns full set of filepaths 
         that complete this satellite pass, subsets and granules
@@ -63,13 +63,20 @@ class OrbitalGranuleFilter(GranuleFilter):
 
         # step outwards, recording granules that intersect AOI,
         dt = self.get_time_step()
-        # step 1/4 an orbit in either direction to look for pass granules
-        n_steps = int( self.orbital_layer.orbital_period()/(dt.total_seconds()/60)/4.0 )
+        # step 1/2 an orbit in either direction to look for pass granules
+        n_steps = int( self.orbital_layer.orbital_period()/(dt.total_seconds()/60)/2.0 )
+        # fwd fill
         for i in range(n_steps):
             if self.check_sampling_from_time(t+i*dt):
                 full_sample += self.source_file_name_parser.filenames_from_time(t+i*dt)
+            elif contiguous:
+                break
+        # bwd fill
+        for i in range(n_steps):
             if self.check_sampling_from_time(t-i*dt):
                 full_sample += self.source_file_name_parser.filenames_from_time(t-i*dt)
+            elif contiguous:
+                break
 
         # return result as GranuleBiDict
         return self.translate(full_sample)

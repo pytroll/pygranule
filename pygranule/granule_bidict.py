@@ -34,6 +34,14 @@ class GranuleBiDict(BiDict):
         """
         return self.gf_parent(self)
 
+    def fill_sampling(self, **kwargs):
+        """
+        Expand the first item in this granule set,
+        using the parent GranuleFilter to include all missing
+        subsets and granules filling the AOI.
+        """
+        return self.gf_parent.fill_sampling(self.keys()[0], **kwargs)
+
     def transfer(self):
         """
         Execute file transfer from source file system 

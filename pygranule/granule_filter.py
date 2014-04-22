@@ -140,7 +140,6 @@ class GranuleFilter(object):
         else:
             return None
 
-
     @abstractmethod
     def fill_sampling(self, filepath):
         """
