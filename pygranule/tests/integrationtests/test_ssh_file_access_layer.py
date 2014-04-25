@@ -24,9 +24,10 @@ class TestSSHFileAccessLayer(unittest.TestCase):
             host = f.readline().strip()
             user = f.readline().strip()
             passwd = f.readline().strip()
-            self.sfal = SSHFileAccessLayer(host, user, passwd)
         except:
             self.skipTest("no 'ssh_test_access' file defined")
+
+        self.sfal = SSHFileAccessLayer(host, user, passwd)
             
         # create some granule file names
         fnp = FileNameParser("/tmp/test_pygranule/ssh/avhr_noaa19_%Y%m%d_%H%M.hrp")
