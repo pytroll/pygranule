@@ -48,6 +48,15 @@ class TestSSHFileAccessLayer(unittest.TestCase):
         sshfiles = self.sfal.list_source_directory("/tmp/test_pygranule/ssh")
         self.assertItemsEqual(sshfiles,self.files)
 
+    def test_check_for_source_file(self):
+        status1 = self.sfal.check_for_source_file(self.files[0])
+        status2 = self.sfal.check_for_source_file("/tmp/test_pygranule/ssh/non_existing_file")
+        self.assertTrue(status1)
+        self.assertFalse(status2)
 
+    def test_copy_file(self):
+        self.sfal.copy_file(self.files[0],"/tmp/test_pygranule/copied_over_file")
+        self.assertTrue( "copied_over_file" in os.listdir("/tmp/test_pygranule") )
+        
 
 
