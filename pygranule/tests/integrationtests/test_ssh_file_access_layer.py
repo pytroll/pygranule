@@ -1,5 +1,6 @@
 
 import unittest
+from mock import Mock
 from pygranule.ssh_file_access_layer import SSHFileAccessLayer
 from pygranule.file_name_parser import FileNameParser
 from datetime import datetime, timedelta
@@ -43,6 +44,7 @@ class TestSSHFileAccessLayer(unittest.TestCase):
         
     def tearDown(self):
         shutil.rmtree("/tmp/test_pygranule")
+        del self.sfal
 
     def test_list_source_directory(self):
         sshfiles = self.sfal.list_source_directory("/tmp/test_pygranule/ssh")
@@ -58,5 +60,16 @@ class TestSSHFileAccessLayer(unittest.TestCase):
         self.sfal.copy_file(self.files[0],"/tmp/test_pygranule/copied_over_file")
         self.assertTrue( "copied_over_file" in os.listdir("/tmp/test_pygranule") )
         
+    def test_remove_source_file(self):
+        self.sfal.remove_source_file(self.files[0])
+        self.assertFalse( os.path.isfile(self.files[0]) )
 
-
+    def test_connection_retention(self):
+        # list files
+        sshfiles = self.sfal.list_source_directory("/tmp/test_pygranule/ssh")
+        # mock out new connection - to prevent it from being called
+        self.sfal._get_new_connection = Mock(return_value=None)
+        # list files again
+        sshfiles2 = self.sfal.list_source_directory("/tmp/test_pygranule/ssh")
+        # assert behaviour is as expected
+        self.assertItemsEqual(sshfiles,sshfiles2)
