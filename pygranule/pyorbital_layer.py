@@ -22,10 +22,11 @@ class PyOrbitalLayer(OrbitalLayer):
         OrbitalLayer.__init__(self,aoi,sat,instrument)
         # instantiate orbital module
         
+        config_file_path = ""
         try:
             config_file_path = os.environ['PYGRANULE_CONFIG_PATH']
         except KeyError:
-            raise OrbitalLayerError( "pygranule config file path missing.  Has the 'PYGRANULE_CONFIG_PATH' environment variable been set?")
+            print "pygranule config file path missing.  Has the 'PYGRANULE_CONFIG_PATH' environment variable been set?"
         
         default_tle_file = config_file_path+"/default.tle"
         
@@ -33,6 +34,7 @@ class PyOrbitalLayer(OrbitalLayer):
             self.orbital = Orbital(sat,default_tle_file)
         except:
             print "Failed to open default tle file:", default_tle_file
+            print "Downloading from internet:"
             try:
                 self.orbital = Orbital(sat)
             except:

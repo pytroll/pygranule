@@ -234,7 +234,13 @@ class OrbitalLayer(object):
 
     def aoi_polygon(self):
         xys = np.array(self.proj(*self.aoi))
-        return geometry.Polygon(xys.transpose().tolist())
+        coords = xys.transpose().tolist()
+        if len(coords) > 2:
+            return geometry.Polygon(coords)
+        elif len(coords) == 2:
+            return geometry.LineString(coords)
+        else:
+            return geometry.Point(coords[0])
 
     def show_swath(self, start, period=None):
         """
@@ -327,7 +333,12 @@ class OrbitalLayer(object):
                 lls = self.proj(xys[0],xys[1],inverse=True)
                 cw.add_polygon(img, area_def, zip(lls[0], lls[1]), outline="blue", fill="blue", fill_opacity=100, width=1)
 
-        cw.add_polygon(img, area_def, zip(*self.aoi), outline="red", fill="red", fill_opacity=100, width=2)
+        aoi_coords = zip(*self.aoi)
+        ## TODO: Handle single point case.
+        if len(aoi_coords) == 2:
+            cw.add_line(img, area_def, aoi_coords, outline="red", fill="red", fill_opacity=100, width=2)
+        else:
+            cw.add_polygon(img, area_def, aoi_coords, outline="red", fill="red", fill_opacity=100, width=2)
         img.show()                
 
     def aoi_center(self):
