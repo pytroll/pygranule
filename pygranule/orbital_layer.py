@@ -208,7 +208,11 @@ class OrbitalLayer(object):
         """
         swath = self.swath_polygon(start, period)
         aoi = self.aoi_polygon()
-        return swath.overlaps(aoi)
+        return swath.intersects(aoi)
+        #return aoi.intersection(swath).area > 0.0
+        # using area intersect because overlaps fails 
+        # for small poly or if swath line does not cross (need to read pyshapely manual)
+        #return swath.overlaps(aoi)
 
     def swath_polygon(self, start, period=None):
         segments = self.swath_working_projection(start,period=period)

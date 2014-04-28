@@ -4,12 +4,14 @@ from datetime import datetime, timedelta
 from .time_tools import floor_granule_datetime
 from .file_name_parser import FileNameParser, file_name_translator
 from .local_file_access_layer import LocalFileAccessLayer
+from .ssh_file_access_layer import SSHFileAccessLayer
 from .bidict import BiDict
 from .granule_bidict import GranuleBiDict
 
 from abc import ABCMeta, abstractmethod
 
 import os
+
 
 class GranuleFilter(object):
     id = 0 # object id. - static class var.
@@ -75,8 +77,12 @@ class GranuleFilter(object):
         # instanciate file access parser, if set
         if self.config['protocol'] == "local":
             self.file_access_layer = LocalFileAccessLayer()
+        elif self.config['protocol'] == "sftp":
+            server = self.config['server']
+            host, user, passwd = _parser_server_string(server)
+            self.file_access_layer = SSHFileAccessLayer(host,user,passwd)
         
-    def validate(self,filename):
+    def validate(self,filename, with_aoi=True):
         """
         Checks if filename matches source file name patter,
         and granulation pattern
@@ -88,24 +94,26 @@ class GranuleFilter(object):
             return False
         # check granulation
         t = self.file_name_parser.time_from_filename(filename)
-        t_flrd = floor_granule_datetime(t,self.get_time_step(),self.get_time_step_offset())
+        t_flrd = floor_granule_datetime(t, self.get_time_step(), self.get_time_step_offset())
         if t_flrd != t:
             return False
         # check aoi intersect
-        if not self.check_sampling_from_time(t):
-            return False
+        if with_aoi:
+            if not self.check_sampling_from_time(t):
+                return False
         # success
         return True
 
 
-    def filter(self, filepaths):
+    def filter(self, filepaths, with_aoi=True):
         """
         Filters a list of input file paths, returning
         only those that pass the validator test (see validate).
+        Returns a GranuleBiDict object.
         """
         reduced_list = []
         for path in filepaths:
-            if self.validate(path):
+            if self.validate(path, with_aoi=with_aoi):
                 reduced_list.append(path)
 
         # returned GranuleBiDict
@@ -168,7 +176,7 @@ class GranuleFilter(object):
         """
         pass
 
-    def list_source(self, t = datetime.now()):
+    def list_source(self, t = datetime.now(), with_aoi=True):
         """
         Lists source directorie(s) 'remote filesystem'.
         Returns validated filename paths as
@@ -187,15 +195,10 @@ class GranuleFilter(object):
             filelist += self.file_access_layer.list_source_directory(d)
 
         # filter filelist
-        source_list = self.filter(filelist)
+        filtered_bidict = self.filter(filelist, with_aoi=with_aoi)
 
-        # map to destination file name paths
-        destin_list = file_name_translator(source_list, 
-                                           self.source_file_name_parser,
-                                           self.destin_file_name_parser)
+        return filtered_bidict
 
-        # return BiDict
-        return BiDict(dict(zip(source_list, destin_list)))
 
     def list_destination(self, t = datetime.now()):
         """
@@ -300,3 +303,14 @@ class GranuleFilterError(Exception):
         self.value = value
     def __str__(self):
         return repr(self.value)
+
+
+def _parser_server_string(s):
+    host = s.split("@")[-1]
+    user = s.split("@")[0].split(':')[0]
+    try: 
+        passwd = s.split("@")[0].split(':')[1]
+    except IndexError:
+        passwd = None
+    return host, user, passwd
+    
