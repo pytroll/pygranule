@@ -29,11 +29,6 @@ class TestOrbitalGranuleFilter(unittest.TestCase):
         for i in range(120):
             self.files += self.gf.source_file_name_parser.filenames_from_time(t+i*dt)
 
-        self.bidict = BiDict()
-        for i in range(120):
-            fn = self.gf.source_file_name_parser.filenames_from_time(t+i*dt)[0]
-            self.bidict[fn] = fn
-
     def test_show_granules(self):
         """
         Plot and display granules found in input file list.
@@ -45,6 +40,14 @@ class TestOrbitalGranuleFilter(unittest.TestCase):
         gf.show( files )
 
         # show only filtered granules (DOING SOME RE-OPERATION TESTS)
-        self.gf(self.bidict).filter().show()
+        gf(files).show()
         
+    def test_show_passes(self):
+        """
+        Plot and display granules part of independent satellite passes
+        """
+        gf = self.gf
+        files = self.files
 
+        for chunk in gf(files).split():
+            chunk.show()

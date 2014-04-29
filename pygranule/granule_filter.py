@@ -119,10 +119,21 @@ class GranuleFilter(object):
         # returned GranuleBiDict
         return self.translate(reduced_list)
         
+    @abstractmethod
+    def split(self, filepaths):
+        """
+        Separates a list of input file paths into 
+        chunks. File paths must have a valid file name pattern.
+        Return result as list of GranuleBiDicts.
+        Note: Opeartion does not pre-perform filtering.
+        """
+        pass
+ 
     def translate(self, filepaths, reverse=False):
         """
         Translate input list of filepaths to destination.
         Return result as GranuleBiDict.
+        Note: Operation does not pre-perform filtering.
         """
         destin_list = self._translate(filepaths, reverse=reverse)
         if destin_list is None:
@@ -211,19 +222,19 @@ class GranuleFilter(object):
         the datetime argument must be used.
         """
         # expand pattern to list of source directories
-        directories = self.destin_file_name_parser.directories(t = t)
+        #directories = self.destin_file_name_parser.directories(t = t)
 
-        destin_list = []
+        #destin_list = []
         # check files in the directories
-        for d in directories:
-            destin_list += self.file_access_layer.list_local_directory(d)
+        #for d in directories:
+        #    destin_list += self.file_access_layer.list_local_directory(d)
 
         # map file names to source file name paths
-        source_list = file_name_translator(destin_list, 
-                                           self.destin_file_name_parser,
-                                           self.source_file_name_parser)
+        #source_list = file_name_translator(destin_list, 
+        #                                   self.destin_file_name_parser,
+        #                                   self.source_file_name_parser)
         # return BiDict
-        return BiDict(dict(zip(destin_list, source_list)))
+        #return BiDict(dict(zip(destin_list, source_list)))
 
     def list_new(self, t = datetime.now() ):
         """
@@ -246,11 +257,11 @@ class GranuleFilter(object):
         # return remaining files as BiDict
         return source_files
 
-    def __call__(self,fileset=None):
+    def __call__(self,fileset=None,with_aoi=True):
         if fileset is None:
-            return self.list_source()
+            return self.list_source(with_aoi=with_aoi)
         else:
-            return self.filter(fileset)
+            return self.filter(fileset,with_aoi=with_aoi)
 
     def __getitem__(self,key):
         return self.config[key]

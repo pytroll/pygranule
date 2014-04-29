@@ -24,6 +24,17 @@ class PeriodicGranuleFilter(GranuleFilter):
         """
         raise NotImplementedError
 
+    def split(self, filepaths):
+        """
+        Separates a list of input file paths into 
+        chunks. File paths must have a valid file name pattern.
+        Return result as list of GranuleBiDicts.
+        Note: Opeartion does not pre-perform filtering.
+        """
+        print "UNIMPELMENTED: should split into BiDicts of same"
+        print "time stamp"
+        
+
     def fill_sampling(self, filepath):
         """
         Given a valid filepath, returns full set of filepaths 

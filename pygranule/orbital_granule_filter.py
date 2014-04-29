@@ -2,6 +2,7 @@
 
 from .granule_filter import GranuleFilter, GranuleFilterError
 from .pyorbital_layer import PyOrbitalLayer
+from datetime import timedelta
 
 class OrbitalGranuleFilter(GranuleFilter):
     
@@ -46,6 +47,47 @@ class OrbitalGranuleFilter(GranuleFilter):
         except ImportError:
             self.orbital_layer.show_swath(t, period=dt.total_seconds()/60.0)
 
+    def split(self, filepaths):
+        """
+        Separates a list of input file paths into 
+        chunks. File paths must have a valid file name pattern.
+        Return result as list of GranuleBiDicts.
+        Note: Opeartion does not pre-perform filtering.
+        """
+        # make datetime filepath list
+        t_fp_pairs = []
+        for fp in filepaths:
+            # get time signature
+            t = self.source_file_name_parser.time_from_filename(fp)
+            t_fp_pairs.append((t,fp))
+        t_fp_pairs.sort()
+        # break up
+        dt = timedelta(minutes=self.orbital_layer.orbital_period()/4.0)
+        parts = []
+        while len(t_fp_pairs) > 0:
+            new_part = []
+            t0 = t_fp_pairs[0][0]
+            mint = t0 - dt
+            maxt = t0 + dt
+            while True:
+                if len(t_fp_pairs) == 0:
+                    parts.append(new_part)
+                    break
+                else:
+                    t = t_fp_pairs[0][0]
+       
+                if (t > mint) and (t < maxt):
+                    new_part.append(t_fp_pairs.pop(0)[1])                    
+                else:
+                    parts.append(new_part)
+                    break
+        # insert into list of bidicts,
+        bidicts = []
+        for part in parts:
+            bidicts.append( self.translate(part) )
+
+        # returned GranuleBiDict
+        return bidicts
 
     def fill_sampling(self, filepath, contiguous=True):
         """

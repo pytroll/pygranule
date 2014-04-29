@@ -323,7 +323,7 @@ class OrbitalLayer(object):
 
         cw.add_grid(img, area_def, (10.0,10.0),(2.0,2.0), fill='blue',
                     outline='gray', outline_opacity=130, minor_outline=None, write_text=False)
-        cw.add_coastlines(img, area_def, resolution='l')
+
         
         # Plot granules
         for t in start:
@@ -331,12 +331,18 @@ class OrbitalLayer(object):
             xys_segs = self.swath_working_projection(t, period)
             for xys in xys_segs:
                 lls = self.proj(xys[0],xys[1],inverse=True)
-                cw.add_polygon(img, area_def, zip(lls[0], lls[1]), outline="blue", fill="blue", fill_opacity=100, width=1)
-
+                cw.add_polygon(img, area_def, zip(lls[0], lls[1]), outline="blue", fill="blue", fill_opacity=70, width=1)
+        cw.add_coastlines(img, area_def, resolution='l')
         aoi_coords = zip(*self.aoi)
-        ## TODO: Handle single point case.
-        if len(aoi_coords) == 2:
-            cw.add_line(img, area_def, aoi_coords, outline="red", fill="red", fill_opacity=100, width=2)
+        ## TODO: Handle single point case properly
+        if len(aoi_coords) == 1:
+            x, y = aoi_coords[0]
+            d =  0.5
+            line_coords = [(x-d,y),(x+d,y)]
+            cw.add_line(img, area_def, line_coords, 
+                        outline="red", fill="red", fill_opacity=100, width=2)
+        elif len(aoi_coords) == 2:
+            cw.add_line(img, area_def, aoi_coords, outline="red", fill="red", fill_opacity=100, width=10)
         else:
             cw.add_polygon(img, area_def, aoi_coords, outline="red", fill="red", fill_opacity=100, width=2)
         img.show()                

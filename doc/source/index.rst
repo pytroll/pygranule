@@ -49,6 +49,49 @@ parent filter, allowing handy attributes such as, :attr:`.show()`,
 
     >>> gf( files ).show()
 
+Filters can also interact with local and remote file systems to access
+granule file names,
+
+    >>> config = {'config_name':"EARS NOAA 19 AVHRR",
+                  'sat_name':"NOAA 19",
+		  'instrument':"AVHRR",
+		  'protocol':"sftp",
+		  'server':"msg@msg01.vedur.is",
+		  'file_source_pattern':"/home/msg/archive/AVHRR/avhrr_%Y%m%d_%H%M00_noaa19.hrp.bz2",
+		  'time_step':"00:01:00",
+		  'time_step_offset':"00:00:00",
+		  'area_of_interest':"(0.0,73.0),(0.0,61.0),(-30.0,61.0),
+	                              (-39,63.5),(-55.666,63.5),(-57.75,65),
+				      (-76,76),(-75,78),(-60,82),(0,90),(30,82),(0,82)"}
+    >>> F = OrbitalGranuleFilter(config)
+    >>> F().show()
+
+.. image:: images/demo3.png
+        :width: 400px
+	:align: center
+
+Now, if you wanted to turn off area of interest filtering
+to show all the granules in the source file system,
+then,
+
+    >>> F(with_aoi=False).show()
+
+.. image:: images/demo4.png
+        :width: 400px
+	:align: center
+
+Targeted granules can also be readily split into chunks (satellite passes),
+
+    >>> for chunk in F().split():
+    >>>     chunk.show()
+
+.. image:: images/split1.png
+        :width: 300px
+.. image:: images/split2.png
+        :width: 300px
+.. image:: images/split3.png
+        :width: 300px
+...
 Off course granule filter will be able to do much much more ...
 
 .. _googlecode: http://code.google.com/p/pygranule/

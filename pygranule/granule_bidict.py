@@ -34,6 +34,14 @@ class GranuleBiDict(BiDict):
         """
         return self.gf_parent(self)
 
+    def split(self):
+        """
+        Split this set of filepaths into
+        contiguous segments using
+        the parent GranuleFilter.
+        """
+        return self.gf_parent.split(self)
+
     def fill_sampling(self, **kwargs):
         """
         Expand the first item in this granule set,

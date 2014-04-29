@@ -1,1 +1,1 @@
-export GETSAT_CONFIG_PATH=/home/hroi/dev/get-sat/etc
+export PYGRANULE_CONFIG_PATH=$PWD/etc
