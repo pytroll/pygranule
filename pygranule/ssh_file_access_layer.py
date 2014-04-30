@@ -58,7 +58,7 @@ class SSHFileAccessLayer(FileAccessLayer):
                     files.append(directory + "/" + x.filename)
         return files
 
-    def copy_file(self, source, destination):
+    def _copy_file(self, source, destination):
         try:
             sftp = self._get_cur_connection()[0]
             sftp.get(source, destination)

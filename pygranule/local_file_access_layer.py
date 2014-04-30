@@ -19,7 +19,7 @@ class LocalFileAccessLayer(FileAccessLayer):
         """
         return self.list_local_directory(directory)
 
-    def copy_file(self, source, destination):
+    def _copy_file(self, source, destination):
         """
         Copes a single file from source path to destination.
         Destination must be a path within the local file system.

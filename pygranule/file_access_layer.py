@@ -7,6 +7,12 @@ from abc import ABCMeta, abstractmethod
 import os
 import shutil
 
+def make_dirs(path):
+    if path is not None:
+        dname = os.path.dirname(path)
+        if not os.path.isdir(dname):
+            os.makedirs(dname)
+
 class FileAccessLayerError(Exception):
     def __init__(self,value):
         self.value = value
@@ -54,8 +60,12 @@ class FileAccessLayer(object):
         """
         return [ directory + '/' + x for x in self.os.listdir(directory) if self.os.path.isfile(directory+'/'+x) ]
 
-    @abstractmethod
     def copy_file(self, source, destination):
+        make_dirs(destination)
+        self._copy_file(source, destination)
+
+    @abstractmethod
+    def _copy_file(self, source, destination):
         """
         Copes a single file from source path to destination.
         Destination must be a path within the local file system.

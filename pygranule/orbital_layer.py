@@ -309,10 +309,11 @@ class OrbitalLayer(object):
                 pass
         except TypeError:
             start = [start]
-
+        start.sort()
 
         from PIL import Image
         from pycoast import ContourWriterAGG
+        from pydecorate import DecoratorAGG
         img = Image.new('RGB', (650, 650))
         proj4_string = ""
         for x in self.working_projection:
@@ -345,6 +346,13 @@ class OrbitalLayer(object):
             cw.add_line(img, area_def, aoi_coords, outline="red", fill="red", fill_opacity=100, width=10)
         else:
             cw.add_polygon(img, area_def, aoi_coords, outline="red", fill="red", fill_opacity=100, width=2)
+        # Decorate
+        dc = DecoratorAGG(img)
+        text = "Granules from time: %s + %.2f min."%(start[0].strftime('%Y.%m.%d %H:%M:%S'), 
+                                            (start[-1]-start[0]).total_seconds()/60.0)
+        dc.align_bottom()
+        dc.add_text(text,height=0)
+
         img.show()                
 
     def aoi_center(self):

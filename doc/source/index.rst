@@ -86,11 +86,11 @@ Targeted granules can also be readily split into chunks (satellite passes),
     >>>     chunk.show()
 
 .. image:: images/split1.png
-        :width: 300px
+        :width: 27%
 .. image:: images/split2.png
-        :width: 300px
+        :width: 27%
 .. image:: images/split3.png
-        :width: 300px
+        :width: 27%
 ...
 Off course granule filter will be able to do much much more ...
 
