@@ -56,7 +56,17 @@ class TestGranuleBiDict(unittest.TestCase):
         del self.gf
 
     def test_sftp_file_transfer(self):
+        # run
         sfiles = self.gf().transfer()
-        raise NotImplementedError
-        print sfiles
+        # find what got copied to local fs
+        local_files = []
+        for path, dirs, files in os.walk('/tmp/test_pygranule/local/'):
+            for f in files:
+                local_files += [path+'/'+f]
+        # assert
+        self.assertItemsEqual(local_files, sfiles.values())
+        
 
+def niceprintdict(mydict):
+    for x in mydict:
+        print x,':',mydict[x]

@@ -7,7 +7,9 @@ from abc import ABCMeta, abstractmethod
 import os
 import shutil
 
-def make_dirs(path):
+def make_dirs(path, os_obj = None):
+    if os_obj is not None:
+        os = os_obj
     if path is not None:
         dname = os.path.dirname(path)
         if not os.path.isdir(dname):
@@ -61,7 +63,7 @@ class FileAccessLayer(object):
         return [ directory + '/' + x for x in self.os.listdir(directory) if self.os.path.isfile(directory+'/'+x) ]
 
     def copy_file(self, source, destination):
-        make_dirs(destination)
+        make_dirs(destination, os_obj = self.os)
         self._copy_file(source, destination)
 
     @abstractmethod

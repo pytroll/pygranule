@@ -14,6 +14,8 @@ class TestLocalFileAccessLayer(unittest.TestCase):
         # mock
         self.fal.os.listdir = Mock(return_value=['file1','file2','file3'])
         self.fal.os.path.isfile = Mock(return_value=True)
+        self.fal.os.path.isdir = Mock()
+        self.fal.os.makedirs = Mock(return_value=True)
         self.fal.shutil.copyfile = Mock()
 
     def tearDown(self):

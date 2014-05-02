@@ -60,6 +60,6 @@ class GranuleBiDict(BiDict):
         """
         for key in self.fwd:
             self.gf_parent.file_access_layer.copy_file(key, self.fwd[key])
-        
+        return self
 
 
