@@ -19,6 +19,11 @@ class GranuleBiDict(BiDict):
         BiDict.__init__(self, dictionary, bare)
         self.gf_parent = gf_parent
         
+    def copy(self):
+        base_copy = BiDict.copy(self)
+        base_copy.gf_parent = self.gf_parent
+        return base_copy
+
     def show(self):
         """
         Show this set of filepaths using
@@ -42,13 +47,31 @@ class GranuleBiDict(BiDict):
         """
         return self.gf_parent.split(self)
 
-    def fill_sampling(self, **kwargs):
+    def complete(self, **kwargs):
         """
         Expand the first item in this granule set,
         using the parent GranuleFilter to include all missing
         subsets and granules filling the AOI.
+        I.e. turns an incomplete sampling into a complete set.
         """
-        return self.gf_parent.fill_sampling(self.keys()[0], **kwargs)
+        return self.gf_parent.complete(self.keys()[0], **kwargs)
+
+    def completeness(self, **kwargs):
+        """
+        Evaluate fractional completion of this granule set
+        with respect to the first item in this granule set.
+        Returns a float, (1 - num. missing)/num when complete.
+        """
+        len_full = float( len( self.complete(**kwargs) ) )
+        len_missing = float( len( self.missing(**kwargs) ) )
+        return (len_full - len_missing)/len_full
+
+    def missing(self, **kwargs):
+        """
+        Returns a BiDict of granules completing a pass
+        w.r.t. the first item in this granule set.
+        """
+        return self.gf_parent.missing(self, **kwargs)
 
     def transfer(self):
         """

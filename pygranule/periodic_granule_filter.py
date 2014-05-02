@@ -35,9 +35,9 @@ class PeriodicGranuleFilter(GranuleFilter):
         print "time stamp"
         
 
-    def fill_sampling(self, filepath):
+    def complete(self, filepath):
         """
-        Given a valid filepath, returns full set of filepaths 
+        Given a valid filepath, returns a full set of filepaths 
         that complete this periodic sampling.
         """
         t = self.source_file_name_parser.time_from_filename(filepath)

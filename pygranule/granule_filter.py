@@ -160,7 +160,7 @@ class GranuleFilter(object):
             return None
 
     @abstractmethod
-    def fill_sampling(self, filepath):
+    def complete(self, filepath):
         """
         Function to be overridden by extended versions of this class.
         For a valid input filepath, it should fill in the filepaths
@@ -170,6 +170,17 @@ class GranuleFilter(object):
         subsets, and granule that complete a satellite pass over the AOI.
         """
         pass
+
+    def missing(self, filepaths, **kwargs):
+        """
+        Returns a BiDict of granules completing a pass
+        w.r.t. the first item in this granule set.
+        """
+        sample = self.translate(filepaths)
+        full = self.complete(sample.keys()[0], **kwargs)
+        diff = full.difference(sample)
+        return diff
+        
 
     @abstractmethod
     def show(self, filepaths):

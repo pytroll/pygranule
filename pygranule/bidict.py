@@ -49,6 +49,9 @@ class BiDict(object):
         self.bwd.update(other.bwd)
         return self
 
+    def __len__(self):
+        return len(self.fwd)
+
     def copy(self):
         new = self.__class__(bare=True)
         new.fwd = self.fwd.copy()
@@ -74,7 +77,8 @@ class BiDict(object):
 
     def remove(self, key):
         val = self.fwd[key]
-        del self.bwd[val]
+        if val is not None: 
+            del self.bwd[val]
         del self.fwd[key]
         return self
 

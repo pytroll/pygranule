@@ -89,7 +89,7 @@ class OrbitalGranuleFilter(GranuleFilter):
         # returned GranuleBiDict
         return bidicts
 
-    def fill_sampling(self, filepath, contiguous=True):
+    def complete(self, filepath, contiguous=True):
         """
         Given a valid filepath, returns full set of filepaths 
         that complete this satellite pass, subsets and granules

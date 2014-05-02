@@ -46,17 +46,17 @@ class TestOrbitalGranuleFilter(unittest.TestCase):
         # Assert
         self.assertItemsEqual(result,[files[2],files[3],files[4]])
 
-    def test_fill_pass(self):
+    def test_complete(self):
         # Run
-        result = self.af.fill_sampling("/home/msg/archive/AVHRR/avhrr_20140225_133500_noaa19.hrp.bz2")
+        result = self.af.complete("/home/msg/archive/AVHRR/avhrr_20140225_133500_noaa19.hrp.bz2")
         # Assert
         self.assertItemsEqual(result, ["/home/msg/archive/AVHRR/avhrr_20140225_133400_noaa19.hrp.bz2",
                                        "/home/msg/archive/AVHRR/avhrr_20140225_133500_noaa19.hrp.bz2",
                                        "/home/msg/archive/AVHRR/avhrr_20140225_133600_noaa19.hrp.bz2"])
         
-    def test_gf_fill_pass_vs_gbd_fill_past(self):
+    def test_gf_complete_vs_gbd_complete(self):
         # Run
-        gf_result = self.af.fill_sampling("/home/msg/archive/AVHRR/avhrr_20140225_133500_noaa19.hrp.bz2")
-        gbd_result = self.af(["/home/msg/archive/AVHRR/avhrr_20140225_133500_noaa19.hrp.bz2"]).fill_sampling()
+        gf_result = self.af.complete("/home/msg/archive/AVHRR/avhrr_20140225_133500_noaa19.hrp.bz2")
+        gbd_result = self.af(["/home/msg/archive/AVHRR/avhrr_20140225_133500_noaa19.hrp.bz2"]).complete()
         # Assert
         self.assertItemsEqual(gf_result, gbd_result)
