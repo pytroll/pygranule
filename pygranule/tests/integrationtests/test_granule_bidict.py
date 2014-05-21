@@ -20,6 +20,7 @@ class TestGranuleBiDict_completeness(unittest.TestCase):
                   'instrument':"AVHRR",
                   'file_source_pattern':"/tmp/test_pygranule/sftp/avhrr_%Y%m%d_%H%M00_noaa19.{0}.hrp.bz2",
                   'subsets':"{L1,L2}",
+                  'granule_duration':"00:01:00",
                   'time_step':"00:01:00",
                   'time_step_offset':"00:00:00",
                   'area_of_interest':"(0.0,73.0),(0.0,61.0),(-30.0,61.0),(-39,63.5),(-55.666,63.5),(-57.75,65),(-76,76),(-75,78),(-60,82),(0,90),(30,82),(0,82)"}
@@ -70,6 +71,7 @@ class TestGranuleBiDict_transfer(unittest.TestCase):
                   'file_source_pattern':"/tmp/test_pygranule/sftp/avhrr_%Y%m%d_%H%M00_noaa19.{0}.hrp.bz2",
                   'file_destination_pattern':"/tmp/test_pygranule/local/%Y/%j/{0}/n19_%H%M%S_%Y%j.{0}.hrp.bz2",
                   'subsets':"{L1,L2}",
+                  'granule_duration':"00:01:00",
                   'time_step':"00:01:00",
                   'time_step_offset':"00:00:00",
                   'area_of_interest':"(0.0,73.0),(0.0,61.0),(-30.0,61.0),(-39,63.5),(-55.666,63.5),(-57.75,65),(-76,76),(-75,78),(-60,82),(0,90),(30,82),(0,82)"}

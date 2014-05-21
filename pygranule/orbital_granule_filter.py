@@ -22,7 +22,7 @@ class OrbitalGranuleFilter(GranuleFilter):
         point / area of interest.
         """
         if period is None:
-            period = self.get_time_step().total_seconds()/60.0
+            period = self.get_granule_duration().total_seconds()/60.0
         
         return self.orbital_layer.does_swath_sample_aoi(start,period)
 
@@ -31,10 +31,10 @@ class OrbitalGranuleFilter(GranuleFilter):
         Shows an image for the area extent of the granules,
         and the target area.
         """
-        dt = self.get_time_step()
+        dt = self.get_granule_duration()
         t = []
         for f in filepaths:
-            t.append(self.source_file_name_parser.time_from_filename(f))
+            t.append(self.time_from_filename(f))
         
         # select plotting routine depending if 
         # pycoast version has add_polygon
@@ -58,7 +58,7 @@ class OrbitalGranuleFilter(GranuleFilter):
         t_fp_pairs = []
         for fp in filepaths:
             # get time signature
-            t = self.source_file_name_parser.time_from_filename(fp)
+            t = self.time_from_filename(fp)
             t_fp_pairs.append((t,fp))
         t_fp_pairs.sort()
         # break up

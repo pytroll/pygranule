@@ -78,7 +78,8 @@ class FileNameParser(object):
         for p in subset_patterns:
             try:
                 t = datetime.strptime(filename, p)
-                return t
+                if filename in self.filenames_from_time(t):
+                    return t
             except ValueError:
                 continue
         return None

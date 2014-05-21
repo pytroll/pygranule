@@ -33,15 +33,13 @@ class GranuleFilter(object):
             ('protocol',None),
             ('server',None),
             ('file_source_pattern',None),
-            ('time_stamp_alignment',0.0),
-            ('granule_time_step',None),
-            ('granule_time_offset',None),
+            ('time_stamp_offset',None),
+            ('granule_duration',None),
             ('time_step',None),
+            ('time_step_start',None),
             ('time_step_offset',None),
             ('subsets',None),
             ('area_of_interest',None),
-            ('point_of_interest',None),
-            ('pass_time_duration',None),
             ('file_destination_pattern',None)
             ])
 
@@ -82,28 +80,37 @@ class GranuleFilter(object):
             host, user, passwd = _parser_server_string(server)
             self.file_access_layer = SSHFileAccessLayer(host,user,passwd)
         
+
+    def time_from_filename(self, filename):
+        """
+        Return datetime stamp of the input granule filename,
+        but corrected with time stamp offset.
+        """
+        return self.file_name_parser.time_from_filename(filename) + self.get_time_stamp_offset()
+
     def validate(self,filename, with_aoi=True):
         """
         Checks if filename matches source file name patter,
-        and granulation pattern
+        and time step pattern (if set)
         and area of interest intersect.
         Returns True or False.
         """
         # check file name pattern
         if not self.file_name_parser.validate_filename(filename):
             return False
-        # check granulation
-        t = self.file_name_parser.time_from_filename(filename)
-        t_flrd = floor_granule_datetime(t, self.get_time_step(), self.get_time_step_offset())
-        if t_flrd != t:
-            return False
+        # retrieve corrected time stamp
+        t = self.time_from_filename(filename)
+        # check time step match if set
+        if self.get_time_step():
+            t_flrd = floor_granule_datetime(t, self.get_time_step(), self.get_time_step_offset())
+            if t_flrd != t:
+                return False
         # check aoi intersect
         if with_aoi:
             if not self.check_sampling_from_time(t):
                 return False
         # success
         return True
-
 
     def filter(self, filepaths, with_aoi=True):
         """
@@ -294,19 +301,45 @@ class GranuleFilter(object):
         else:
             return self.config[key]
 
+    def get_time_stamp_offset(self):
+        if self.config["time_stamp_offset"]:
+            str_splt = self.config["time_stamp_offset"].split(":")
+            h = int(str_splt[0])
+            m = int(str_splt[1])
+            s = float(str_splt[2])
+            return timedelta(hours=h,minutes=m,seconds=s)
+        else:
+            return timedelta(0)
+
+    def get_granule_duration(self):
+        if self.config["granule_duration"]:
+            str_splt = self.config["granule_duration"].split(":")
+            h = int(str_splt[0])
+            m = int(str_splt[1])
+            s = float(str_splt[2])
+            return timedelta(hours=h,minutes=m,seconds=s)
+        else:
+            return None
+
     def get_time_step(self):
-        str_splt = self._validated_config("time_step").split(":")
-        h = int(str_splt[0])
-        m = int(str_splt[1])
-        s = int(str_splt[2])
-        return timedelta(hours=h,minutes=m,seconds=s)
+        if self.config["time_step"]:
+            str_splt = self.config["time_step"].split(":")
+            h = int(str_splt[0])
+            m = int(str_splt[1])
+            s = float(str_splt[2])
+            return timedelta(hours=h,minutes=m,seconds=s)
+        else:
+            return None
 
     def get_time_step_offset(self):
-        str_splt = self._validated_config("time_step_offset").split(":")
-        h = int(str_splt[0])
-        m = int(str_splt[1])
-        s = int(str_splt[2])
-        return timedelta(hours=h,minutes=m,seconds=s)
+        if self.config["time_step_offset"]:
+            str_splt = self.config["time_step_offset"].split(":")
+            h = int(str_splt[0])
+            m = int(str_splt[1])
+            s = float(str_splt[2])
+            return timedelta(hours=h,minutes=m,seconds=s)
+        else:
+            return timedelta(0)
 
     def get_area_of_interest(self):
         aoi=[]

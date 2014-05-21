@@ -10,6 +10,7 @@ class TestOrbitalGranuleFilter(unittest.TestCase):
                   'sat_name':"NOAA 19",
                   'instrument':"AVHRR",
                   'file_source_pattern':"/home/msg/archive/AVHRR/avhrr_%Y%m%d_%H%M00_noaa19.hrp.bz2",
+                  'granule_duration':"00:01:00",
                   'time_step':"00:01:00",
                   'time_step_offset':"00:00:00",
                   'area_of_interest':"(-25,62.5),(-25,67),(-13,67),(-13,62.5)"}
