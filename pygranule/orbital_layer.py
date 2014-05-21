@@ -137,7 +137,7 @@ class OrbitalLayer(object):
 
         # 100th step of orbit should be sufficient resolution for resulting polygon
         # equivalent ot 1m AVHRR granule
-        t_step = self.orbital_period()/100.0
+        t_step = self.orbital_period()/1000.0
         t_steps = np.arange(0.0, period+t_step, t_step)
 
         # fetch all scan lines and index segments
