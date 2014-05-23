@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import numpy as np
 
 import os
-from pyorbital.geoloc_instrument_definitions import avhrr
+from pyorbital.geoloc_instrument_definitions import avhrr, viirs
 from pyorbital.geoloc import compute_pixels, get_lonlatalt
 #from urllib2 import URLError
 from pyorbital.orbital import Orbital
@@ -41,9 +41,12 @@ class PyOrbitalLayer(OrbitalLayer):
                 raise OrbitalLayerError("Pyorbital Failed to fetch TLE from internet.")
                 
         # create scan geometry - one scan line.
-        scan_steps = np.arange(0,self.instrument_info['scan_steps'],self.instrument_info['scan_steps']/8-1)
-        scan_steps[-1] = self.instrument_info['scan_steps']-1
-        self.scan_geom = avhrr(1,scan_steps)
+        if instrument == "AVHRR":
+            scan_steps = np.arange(0,self.instrument_info['scan_steps'],self.instrument_info['scan_steps']/8-1)
+            scan_steps[-1] = self.instrument_info['scan_steps']-1
+            self.scan_geom = avhrr(1,scan_steps)
+        elif instrument == "VIIRS":
+            self.scan_geom = viirs(1)
 
     def set_tle(self, line1, line2):
         # for now restart pyorbital with these new elements.
